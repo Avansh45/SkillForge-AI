@@ -1,3 +1,19 @@
+function getUsersStore() {
+  const raw = localStorage.getItem("skillforgeUsers");
+  if (!raw) return {};
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === "object") return parsed;
+    return {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function setUsersStore(store) {
+  localStorage.setItem("skillforgeUsers", JSON.stringify(store));
+}
+
 function saveUserSession(role, name, email) {
   const userData = {
     role,
@@ -135,15 +151,36 @@ if (loginForm) {
     const password = passwordEl.value.trim();
 
     if (!email || !password) {
+      error.textContent = "Please fill all fields.";
+      error.style.display = "block";
+      return;
+    }
+
+    const store = getUsersStore();
+    const key = email.toLowerCase();
+    const user = store[key];
+
+    if (!user) {
+      error.textContent = "No account found with this email. Please sign up first.";
+      error.style.display = "block";
+      return;
+    }
+
+    if (user.role !== role) {
+      error.textContent = "This email is registered as " + user.role + ". Please select the " + user.role + " role to login.";
+      error.style.display = "block";
+      return;
+    }
+
+    if (user.password !== password) {
+      error.textContent = "Incorrect password.";
       error.style.display = "block";
       return;
     }
 
     error.style.display = "none";
-
-    const nameGuess = email.split("@")[0] || "User";
-    saveUserSession(role, nameGuess, email);
-    redirectToDashboard(role);
+    saveUserSession(user.role, user.name, user.email);
+    redirectToDashboard(user.role);
   });
 }
 
@@ -165,12 +202,37 @@ if (signupForm) {
     const password = passwordEl.value.trim();
 
     if (!name || !email || !password) {
+      error.textContent = "Please fill all fields.";
       error.style.display = "block";
       return;
     }
 
-    error.style.display = "none";
+    const store = getUsersStore();
+    const key = email.toLowerCase();
+    const existing = store[key];
 
+    if (existing && existing.role !== role) {
+      error.textContent = "This email is already registered as " + existing.role + ". Please sign up or login as " + existing.role + ".";
+      error.style.display = "block";
+      return;
+    }
+
+    if (existing && existing.role === role) {
+      error.textContent = "Account already exists for this role. Please login instead.";
+      error.style.display = "block";
+      return;
+    }
+
+    const newUser = {
+      role,
+      name,
+      email,
+      password
+    };
+    store[key] = newUser;
+    setUsersStore(store);
+
+    error.style.display = "none";
     saveUserSession(role, name, email);
     redirectToDashboard(role);
   });
