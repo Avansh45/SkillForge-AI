@@ -363,33 +363,15 @@
       margin-bottom: 6px;
     }
 
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 18px 0;
-      font-size: 12px;
-      color: var(--muted);
-      background: #f9fafb;
-      margin-top: 20px;
-    }
-
-    .footer-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .footer-links {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .footer-links a {
-      font-size: 12px;
-      color: var(--muted);
-    }
+.premium-footer {
+  padding: 22px 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text);
+  background: linear-gradient(to right, #f0fdf4, #ffffff);
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.06);
+  backdrop-filter: blur(6px);
+}
 
     @media (max-width: 900px) {
       .grid {
@@ -759,20 +741,15 @@
     </div>
   </main>
 
-  <footer>
-    <div class="container footer-content">
-      <span>© <span id="year"></span> SkillForge. All rights reserved.</span>
-      <div class="footer-links">
-        <a href="../HomePage/index.html">Home</a>
-      </div>
-    </div>
-  </footer>
+<footer class="sf-footer premium-footer">
+  <span id="sf-year"></span>
+</footer>
 
   <script>
-    const yearEl = document.getElementById("year");
-    if (yearEl) {
-      yearEl.textContent = new Date().getFullYear();
-    }
+  const yearEl = document.getElementById("sf-year");
+  if (yearEl) {
+    yearEl.textContent = `© ${new Date().getFullYear()} SkillForge. All rights reserved.`;
+  }
 
     const rawUser = localStorage.getItem("skillforgeUser");
 

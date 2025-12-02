@@ -32,10 +32,10 @@ function redirectToDashboard(role) {
   window.location.href = target;
 }
 
-const yearEl = document.getElementById("year");
-if (yearEl) {
-  yearEl.textContent = new Date().getFullYear();
-}
+  const yearEl = document.getElementById("sf-year");
+  if (yearEl) {
+    yearEl.textContent = `© ${new Date().getFullYear()} SkillForge. All rights reserved.`;
+  }
 
 const navToggle = document.getElementById("navToggle");
 const navLinks = document.getElementById("navLinks");
