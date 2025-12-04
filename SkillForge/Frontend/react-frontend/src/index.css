@@ -1,0 +1,65 @@
+/*index.css */
+:root{
+  --primary: #16a34a;
+  --accent: #22c55e;
+  --bg: #f3f4f6;
+  --text: #111827;
+  --muted: #6b7280;
+  --card: #ffffff;
+  --border: #e5e7eb;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top, #e5f7ec 0, #f3f4f6 40%, #f9fafb 100%);
+  color:var(--text);
+  line-height:1.5;
+  min-height:100vh;
+}
+
+.container{width:90%;max-width:1200px;margin:0 auto;padding:18px;}
+
+.header, .footer{background:#fff;border-bottom:1px solid var(--border);}
+
+.header .topbar, .footer{padding:12px 0}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px
+}
+.logo-circle
+{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:radial-gradient(circle at 30% 30%, #bbf7d0, var(--primary));color:white;
+  font-weight:700
+}
+.nav-links{
+  display:flex;
+  gap:14px;
+  align-items:center}
+.nav-links a{
+  color:var(--muted);
+  text-decoration:none;
+  padding:6px}
+.nav-links a.active{color:var(--primary)}
+.btn{padding:8px 14px;border-radius:999px;border:1px solid transparent;cursor:pointer}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--accent));color:white;border:none}
+.card{background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:14px;
+  box-shadow:0 12px 30px rgba(15,23,42,0.04)}
+.section{padding:30px 0}
+.grid{display:grid;grid-template-columns:2.1fr 1fr;gap:20px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.footer .container{text-align:center;font-size:13px;color:var(--muted);padding:18px 0}
+.small{font-size:13px;color:var(--muted)}
+.list{list-style:none}
+.list li{padding:8px 0;border-bottom:1px dashed var(--border);display:flex;justify-content:space-between}
