@@ -4,15 +4,55 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Login from './Login';
 import Signup from './Signup';
+import ContactSection from '../components/ContactSection';
 
 const Home = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignupOpen, setIsSignupOpen] = useState(false);
 
-  const handleContactSubmit = (e) => {
-    e.preventDefault();
-    alert('Thank you for contacting SkillForge. We will get back to you soon.');
-    e.target.reset();
+  const [formSuccess, setFormSuccess] = useState('');
+  const [formError, setFormError] = useState('');
+
+  const handleContactSubmit = async (data) => {
+    setFormError('');
+    setFormSuccess('');
+
+    
+    if (!data?.name || !data?.email || !data?.message) {
+      setFormError('Please fill in all required fields.');
+      return false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(data.email.trim())) {
+      setFormError('Please enter a valid email address.');
+      return false;
+    }
+
+    const message = {
+      id: `msg_${Date.now()}`,
+      name: data.name.trim(),
+      email: data.email.trim(),
+      role: data.role || 'Student',
+      message: data.message.trim(),
+      createdAt: new Date().toISOString(),
+      status: 'new',
+    };
+
+    try {
+      
+      const inboxKey = 'skillforge_contact_inbox';
+      const existing = JSON.parse(localStorage.getItem(inboxKey) || '[]');
+      existing.unshift(message); // newest first
+      localStorage.setItem(inboxKey, JSON.stringify(existing));
+
+      setFormSuccess('Thanks — your message has been received. We will contact you soon.');
+      return true;
+    } catch (err) {
+      console.error('Saving contact message failed', err);
+      setFormError('Something went wrong while sending your message. Please try again.');
+      return false;
+    }
   };
 
   return (
@@ -145,255 +185,8 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features">
-        <div className="container">
-          <div className="section-heading">
-            <h2>Features & Benefits</h2>
-            <p>Everything you need to design, deliver, and analyse adaptive learning and exams on one platform.</p>
-          </div>
-
-          <div className="cards-grid">
-            <div className="card">
-              <h3>AI-driven Adaptive Engine</h3>
-              <p>Tracks accuracy, time, and attempts to continuously rebalance question difficulty for each learner.</p>
-              <span className="card-tag">Benefit: Right level of challenge</span>
-            </div>
-            <div className="card">
-              <h3>Smart Exam Generator</h3>
-              <p>Filter by course, topic, difficulty, and marks to auto-generate balanced exams in seconds.</p>
-              <span className="card-tag">Benefit: Save hours of manual work</span>
-            </div>
-            <div className="card">
-              <h3>Role-based Dashboards</h3>
-              <p>Students view progress, instructors see class analytics, and admins monitor platform-wide performance.</p>
-              <span className="card-tag">Benefit: Clarity for every stakeholder</span>
-            </div>
-            <div className="card">
-              <h3>Performance Analytics</h3>
-              <p>Visual reports on accuracy, topic-wise performance, difficulty vs. score, and improvement trends.</p>
-              <span className="card-tag">Benefit: Data-backed decisions</span>
-            </div>
-            <div className="card">
-              <h3>Question Bank Management</h3>
-              <p>Create, tag, and organise questions with support for MCQ, coding, and subjective styles.</p>
-              <span className="card-tag">Benefit: Reusable content library</span>
-            </div>
-            <div className="card">
-              <h3>Exam Integrity & Settings</h3>
-              <p>Control time limits, shuffling, negative marking, and attempt rules in a few clicks.</p>
-              <span className="card-tag">Benefit: Flexible assessments</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Courses Section */}
-      <section id="courses">
-        <div className="container">
-          <div className="section-heading">
-            <h2>Courses You Can Power with SkillForge</h2>
-            <p>Use SkillForge for placement prep, semester subjects, internal tests, or skill-based micro-courses.</p>
-          </div>
-
-          <div className="course-grid">
-            <div className="course-card">
-              <span className="badge-small">Placement Prep</span>
-              <h3>Java + DSA Foundations</h3>
-              <p className="course-meta">Ideal for coding rounds, online assessments, and campus placements.</p>
-              <p>Topic-wise adaptive quizzes, timed coding tasks, and auto-graded tests.</p>
-              <div className="course-footer">
-                <span>40+ modules</span>
-                <span>Adaptive level · On</span>
-              </div>
-            </div>
-            <div className="course-card">
-              <span className="badge-small">Aptitude</span>
-              <h3>Quant & Logical Reasoning</h3>
-              <p className="course-meta">From basics to high-level puzzles.</p>
-              <p>Step-wise hints, timed sections, and difficulty that scales with you.</p>
-              <div className="course-footer">
-                <span>30+ test sets</span>
-                <span>AI analysis</span>
-              </div>
-            </div>
-            <div className="course-card">
-              <span className="badge-small">Communication</span>
-              <h3>Verbal & English Practice</h3>
-              <p className="course-meta">RC, grammar, vocabulary, and email writing tasks.</p>
-              <p>Adaptive reading passages and vocabulary tests with spaced repetition.</p>
-              <div className="course-footer">
-                <span>20+ practice packs</span>
-                <span>Skill tags</span>
-              </div>
-            </div>
-            <div className="course-card">
-              <span className="badge-small">Core CS</span>
-              <h3>OS, DBMS & CN Objective Tests</h3>
-              <p className="course-meta">College subject tests and quick revision.</p>
-              <p>Topic-wise question banks with exam-style mocks.</p>
-              <div className="course-footer">
-                <span>Chapter-wise</span>
-                <span>Exam mode</span>
-              </div>
-            </div>
-            <div className="course-card">
-              <span className="badge-small">Custom</span>
-              <h3>Faculty-designed Courses</h3>
-              <p className="course-meta">Create your own course and link question banks.</p>
-              <p>Perfect for internal assessments and institute-specific exams.</p>
-              <div className="course-footer">
-                <span>Unlimited courses</span>
-                <span>Instructor-led</span>
-              </div>
-            </div>
-            <div className="course-card">
-              <span className="badge-small">Practice Mode</span>
-              <h3>Daily Mixed Practice</h3>
-              <p className="course-meta">Short 15–20 minute sets.</p>
-              <p>Daily adaptive practice to maintain consistency and track streaks.</p>
-              <div className="course-footer">
-                <span>Daily goals</span>
-                <span>Streaks</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* AI Engine Section */}
-      <section id="ai">
-        <div className="container">
-          <div className="section-heading">
-            <h2>AI Engine & The Rising Hype</h2>
-            <p>AI in education is growing rapidly — from content generation to adaptive assessments. SkillForge rides this wave responsibly.</p>
-          </div>
-
-          <div className="ai-content">
-            <div>
-              <p className="ai-highlight-text">
-                In the last few years, AI-assisted tools have moved from "nice to have" to "must have". Institutions, training centres, and students now expect personalised experiences rather than one static exam for everyone.
-              </p>
-
-              <div className="ai-stats">
-                <div className="ai-stat">
-                  <strong>4x</strong>
-                  Growth in AI tools adoption in education over recent years.
-                </div>
-                <div className="ai-stat">
-                  <strong>65%</strong>
-                  Students say personalised practice improves confidence.
-                </div>
-                <div className="ai-stat">
-                  <strong>50%</strong>
-                  Time saved by instructors when using AI question generation.
-                </div>
-              </div>
-
-              <div className="ai-timeline">
-                <div className="ai-timeline-item">
-                  <span className="ai-timeline-dot"></span>
-                  <span>Phase 1: Static question banks & manual paper setting.</span>
-                </div>
-                <div className="ai-timeline-item">
-                  <span className="ai-timeline-dot"></span>
-                  <span>Phase 2: Online exams with limited analytics.</span>
-                </div>
-                <div className="ai-timeline-item">
-                  <span className="ai-timeline-dot"></span>
-                  <span>Phase 3: AI-driven adaptive learning — where SkillForge fits in.</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="ai-card">
-              <h3>How SkillForge Uses AI</h3>
-              <p className="card-sub">We don't use AI just for "hype". Our AI layer focuses on practicality and fairness:</p>
-              <div className="ai-chip-row">
-                <span className="ai-chip">Adaptive difficulty engine</span>
-                <span className="ai-chip">Question recommendation</span>
-                <span className="ai-chip">Performance clustering</span>
-                <span className="ai-chip">Exam blueprint validation</span>
-              </div>
-              <ul className="list">
-                <li>
-                  <span className="about-bullet">✓</span>
-                  Analyses performance patterns to recommend next best questions.
-                </li>
-                <li>
-                  <span className="about-bullet">✓</span>
-                  Ensures each exam remains balanced across topics & difficulty levels.
-                </li>
-                <li>
-                  <span className="about-bullet">✓</span>
-                  Prevents over-repetition of questions for serious learners.
-                </li>
-                <li>
-                  <span className="about-bullet">✓</span>
-                  Helps instructors identify which students need attention quickly.
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="cta">
-            <div>
-              <h3>Ready to build your adaptive learning space?</h3>
-              <p>Start as a student, instructor, or admin — and connect dashboards as your ecosystem grows.</p>
-            </div>
-            <button className="btn btn-primary" onClick={() => setIsSignupOpen(true)}>
-              Create Free Account
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Section */}
-      <section id="contact">
-        <div className="container">
-          <div className="section-heading">
-            <h2>Contact & Demo</h2>
-            <p>Have questions or want to try SkillForge with your batch? Drop a message and we'll get in touch.</p>
-          </div>
-
-          <div className="contact-grid">
-            <div className="contact-info">
-              <p><strong>Email:</strong> contact@skillforge.ai (placeholder)</p>
-              <p><strong>Use cases:</strong> College training, placement cell, coaching institutes, and internal assessments.</p>
-              <p><strong>Note:</strong> Dashboards for students, instructors, and admins can be customised as per your institute's needs.</p>
-            </div>
-
-            <div className="contact-form">
-              <form onSubmit={handleContactSubmit}>
-                <div className="form-group">
-                  <label htmlFor="contactName">Name*</label>
-                  <input type="text" id="contactName" required />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="contactEmail">Email*</label>
-                  <input type="email" id="contactEmail" required />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="contactRole">I am a</label>
-                  <select id="contactRole">
-                    <option>Student</option>
-                    <option>Instructor</option>
-                    <option>Admin</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label htmlFor="contactMessage">Message*</label>
-                  <textarea id="contactMessage" required></textarea>
-                </div>
-                <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
-                  Send Message
-                </button>
-                <p className="muted" style={{ marginTop: '8px' }}>Our team will get back to you with more details.</p>
-              </form>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Contact Section (component) */}
+      <ContactSection onSubmit={handleContactSubmit} />
 
       <Footer />
 
