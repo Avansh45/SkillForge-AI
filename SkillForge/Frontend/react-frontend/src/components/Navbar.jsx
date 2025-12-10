@@ -11,6 +11,15 @@ const Navbar = ({ items, activeSection, onSectionChange }) => {
 
   return (
     <nav className="dash-nav">
+      <button
+        className="nav-toggle"
+        id="dashNavToggle"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
       <ul id="dashNavLinks" className={isOpen ? 'open' : ''}>
         {items.map((item) => (
           <li key={item.key}>
@@ -28,15 +37,6 @@ const Navbar = ({ items, activeSection, onSectionChange }) => {
           </li>
         ))}
       </ul>
-      <button
-        className="nav-toggle"
-        id="dashNavToggle"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
     </nav>
   );
 };

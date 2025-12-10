@@ -185,6 +185,122 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Features Section */}
+      <section id="features">
+        <div className="container">
+          <div className="section-heading">
+            <h2>Platform Features</h2>
+            <p>Everything you need to run adaptive learning and assessments in one place.</p>
+          </div>
+
+          <div className="feature-grid">
+            <div className="feature-card">
+              <div className="pill">Assessment</div>
+              <h3>AI Exam Builder</h3>
+              <p>Create balanced exams with tags for topics, difficulty, and outcomes. Auto-generate variants in seconds.</p>
+              <ul>
+                <li>Blueprint-based generation</li>
+                <li>Time limits and retake rules</li>
+                <li>Instant scoring</li>
+              </ul>
+            </div>
+
+            <div className="feature-card">
+              <div className="pill">Analytics</div>
+              <h3>Skill Radar</h3>
+              <p>Live dashboards for accuracy, speed, and concept mastery across cohorts or individual learners.</p>
+              <ul>
+                <li>Weak-area detection</li>
+                <li>Progress over time</li>
+                <li>Exportable reports</li>
+              </ul>
+            </div>
+
+            <div className="feature-card">
+              <div className="pill">Collaboration</div>
+              <h3>Instructor Workspace</h3>
+              <p>Manage batches, assign practice, review attempts, and leave inline feedback on questions.</p>
+              <ul>
+                <li>Batch-level insights</li>
+                <li>Assignment scheduling</li>
+                <li>Role-based access</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Courses Section */}
+      <section id="courses">
+        <div className="container">
+          <div className="section-heading">
+            <h2>Popular Course Tracks</h2>
+            <p>Ready-made tracks to help students and teams ramp up faster.</p>
+          </div>
+
+          <div className="course-grid">
+            <div className="course-card">
+              <span className="pill">Development</span>
+              <h3>Full-Stack Java</h3>
+              <p>Spring Boot, REST, JPA, testing, and CI/CD fundamentals with adaptive practice exams.</p>
+              <div className="course-meta">
+                <span>12 modules</span>
+                <span>Projects + exams</span>
+              </div>
+            </div>
+
+            <div className="course-card">
+              <span className="pill">Data</span>
+              <h3>Data Structures & Algorithms</h3>
+              <p>Adaptive question sets on arrays, trees, graphs, DP, and complexity analysis.</p>
+              <div className="course-meta">
+                <span>150+ questions</span>
+                <span>Timed mocks</span>
+              </div>
+            </div>
+
+            <div className="course-card">
+              <span className="pill">Cloud</span>
+              <h3>DevOps Foundations</h3>
+              <p>CI/CD pipelines, Docker, Kubernetes basics, and reliability drills with scenario-based quizzes.</p>
+              <div className="course-meta">
+                <span>8 labs</span>
+                <span>Checkpoints</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* AI Engine Section */}
+      <section id="ai" className="ai-section">
+        <div className="container">
+          <div className="section-heading">
+            <h2>AI Engine</h2>
+            <p>How SkillForge adapts to every learner.</p>
+          </div>
+
+          <div className="ai-grid">
+            <div className="ai-card">
+              <h3>Dynamic Difficulty</h3>
+              <p>Adjusts question difficulty after each attempt using rolling accuracy and time-to-answer.</p>
+            </div>
+            <div className="ai-card">
+              <h3>Recommendation Graph</h3>
+              <p>Maps skills to prerequisites to suggest the next best module or micro-lesson.</p>
+            </div>
+            <div className="ai-card">
+              <h3>Generative Exams</h3>
+              <p>Builds balanced mocks from tagged banks; prevents overlap and keeps variants fresh.</p>
+            </div>
+            <div className="ai-card">
+              <h3>Feedback Loops</h3>
+              <p>Captures question-level feedback to improve future recommendations and item quality.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Contact Section (component) */}
       <ContactSection onSubmit={handleContactSubmit} />
 

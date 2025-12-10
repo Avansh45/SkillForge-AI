@@ -10,7 +10,7 @@ const Login = ({ isOpen, onClose }) => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -19,15 +19,14 @@ const Login = ({ isOpen, onClose }) => {
       return;
     }
 
-    const result = loginUser(role, email.trim(), password.trim());
+    const result = await loginUser(role, email.trim(), password.trim());
 
     if (!result.success) {
       setError(result.error);
       return;
     }
 
-    // Save session and redirect
-    saveUserSession(result.user.role, result.user.name, result.user.email);
+    // Session is saved in loginUser function, just redirect
     const dashboardPath = getDashboardPath(result.user.role);
     navigate(dashboardPath);
   };

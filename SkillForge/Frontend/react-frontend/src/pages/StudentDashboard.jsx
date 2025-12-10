@@ -67,17 +67,20 @@ const StudentDashboard = () => {
               </button>
             </div>
           </div>
+        </div>
+      </header>
 
+      <div className="dashboard-layout">
+        <aside className="dashboard-sidebar">
           <Navbar
             items={navItems}
             activeSection={activeSection}
             onSectionChange={handleSectionChange}
           />
-        </div>
-      </header>
+        </aside>
 
-      <main>
-        <div className="container">
+        <main className="dashboard-main">
+          <div className="container">
           <section id="studentSection">
             {/* Overview Section */}
             <div className="section-block" data-section="overview">
@@ -368,8 +371,9 @@ const StudentDashboard = () => {
               </div>
             </div>
           </section>
-        </div>
-      </main>
+          </div>
+        </main>
+      </div>
 
       <Footer />
     </>
