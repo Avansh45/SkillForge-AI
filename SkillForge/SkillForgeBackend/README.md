@@ -1,135 +1,266 @@
-# SkillForge Backend API
 
-Spring Boot REST API backend for the SkillForge Learning Platform.
+<h1>SkillForge Backend API</h1>
 
-## Features
+<p>
+SkillForge Backend is a Spring Boot REST API that acts as the core backend system
+for the SkillForge Learning Platform. It manages authentication, authorization,
+users, courses, enrollments, videos, exams, and performance tracking.
+</p>
 
-- **User Authentication**: JWT-based authentication with role-based access control (Student, Instructor, Admin)
-- **Course Management**: Create, update, delete courses
-- **Enrollment System**: Students can enroll/unenroll in courses
-- **Video Management**: Instructors can upload videos or link YouTube/external videos to courses
-- **Exam System**: Create and manage exams
-- **Performance Analytics**: Track student performance and progress
-- **Batch Management**: Organize students into batches
+<hr>
 
-## Prerequisites
+<h2>Purpose of the Backend</h2>
+<ul>
+    <li>Provides REST APIs for frontend applications</li>
+    <li>Handles user authentication using JWT</li>
+    <li>Implements role-based authorization</li>
+    <li>Manages MySQL database operations</li>
+    <li>Secures sensitive user data</li>
+</ul>
 
-- Java 17 or higher
-- Maven 3.6+
-- MySQL 8.0+
-- IDE (IntelliJ IDEA, Eclipse, or VS Code)
+<hr>
 
-## Setup Instructions
+<h2>Backend Working Flow</h2>
 
-### 1. Database Setup
+<pre>
+Client (React / Postman)
+        |
+        v
+JWT Authentication Filter
+        |
+        v
+Controller Layer (REST APIs)
+        |
+        v
+Service Layer (Business Logic)
+        |
+        v
+Repository Layer (JPA / Hibernate)
+        |
+        v
+MySQL Database
+</pre>
 
-Create a MySQL database:
+<hr>
 
-```sql
-CREATE DATABASE skillforge_db;
-```
+<h2>Technologies Used</h2>
 
-Update database credentials in `src/main/resources/application.properties`:
+<ul>
+    <li>Java 17</li>
+    <li>Spring Boot 3</li>
+    <li>Spring Security</li>
+    <li>JWT (JSON Web Token)</li>
+    <li>Hibernate / JPA</li>
+    <li>MySQL Database</li>
+    <li>Maven</li>
+    <li>BCrypt Password Encoder</li>
+    <li>REST API Architecture</li>
+</ul>
 
-```properties
+<hr>
+
+<h2>Authentication</h2>
+
+<p>
+Authentication is implemented using JWT (JSON Web Token).
+When a user logs in successfully, the backend generates a token that contains
+the user's email, role, and expiration time.
+</p>
+
+<p>
+The client must send this token in the Authorization header for all protected APIs.
+</p>
+
+<pre>
+Authorization: Bearer &lt;JWT_TOKEN&gt;
+</pre>
+
+<hr>
+
+<h2>Authorization</h2>
+
+<p>
+Authorization is role-based. Each API is protected based on user roles.
+</p>
+
+<h3>User Roles</h3>
+<ul>
+    <li>STUDENT</li>
+    <li>INSTRUCTOR</li>
+    <li>ADMIN</li>
+</ul>
+
+<h3>Role Access</h3>
+<ul>
+    <li>Student: Enroll courses, view dashboard, watch videos</li>
+    <li>Instructor: Create courses, upload videos, manage exams</li>
+    <li>Admin: Manage users, roles, and platform data</li>
+</ul>
+
+<hr>
+
+<h2>Database (MySQL)</h2>
+
+<p>
+The backend uses MySQL as the relational database.
+</p>
+
+<h3>Database Name</h3>
+<pre>skillforge_db</pre>
+
+<h3>Main Tables</h3>
+<ul>
+    <li>users</li>
+    <li>courses</li>
+    <li>enrollments</li>
+    <li>videos</li>
+    <li>exams</li>
+    <li>exam_attempts</li>
+    <li>batches</li>
+</ul>
+
+<h3>Database Configuration</h3>
+<pre>
+spring.datasource.url=jdbc:mysql://localhost:3306/skillforge_db
 spring.datasource.username=root
 spring.datasource.password=your_password
-```
+spring.jpa.hibernate.ddl-auto=validate
+</pre>
 
-### 2. Build and Run
+<hr>
 
-```bash
-# Navigate to backend directory
-cd SkillForgeBackend
+<h2>Project Structure</h2>
 
-# Build the project
-mvn clean install
+<pre>
+SkillForgeBackend
+└── src
+    └── main
+        ├── java
+        │   └── com.skillforge
+        │       ├── controller
+        │       ├── dto
+        │       ├── entity
+        │       ├── repository
+        │       ├── security
+        │       ├── service
+        │       └── SkillForgeBackendApplication.java
+        └── resources
+            └── application.properties
 
-# Run the application
-mvn spring-boot:run
-```
+</pre>
 
-The API will be available at `http://localhost:8080`
+<hr>
 
-## API Endpoints
+<h2>API Endpoints</h2>
 
-### Authentication
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - Login user
+<h3>Authentication APIs</h3>
+<ul>
+    <li>POST /api/auth/register</li>
+    <li>POST /api/auth/login</li>
+</ul>
 
-### Student APIs
-- `GET /api/students/me` - Get student profile
-- `GET /api/students/dashboard` - Get student dashboard
-- `GET /api/students/enrollments` - Get enrolled courses
-- `POST /api/students/enroll/{courseId}` - Enroll in course
-- `POST /api/students/unenroll/{courseId}` - Unenroll from course
+<h3>Student APIs</h3>
+<ul>
+    <li>GET /api/students/me</li>
+    <li>GET /api/students/dashboard</li>
+    <li>GET /api/students/enrollments</li>
+    <li>POST /api/students/enroll/{courseId}</li>
+    <li>POST /api/students/unenroll/{courseId}</li>
+</ul>
 
-### Instructor APIs
-- `GET /api/instructors/me` - Get instructor profile
-- `GET /api/instructors/dashboard` - Get instructor dashboard
-- `GET /api/instructors/courses` - Get instructor's courses
-- `POST /api/courses` - Create course
-- `POST /api/courses/{courseId}/videos/upload` - Upload video
-- `POST /api/courses/{courseId}/videos/link` - Link YouTube/external video
+<h3>Instructor APIs</h3>
+<ul>
+    <li>GET /api/instructors/me</li>
+    <li>GET /api/instructors/dashboard</li>
+    <li>GET /api/instructors/courses</li>
+    <li>POST /api/courses</li>
+    <li>POST /api/courses/{courseId}/videos/upload</li>
+    <li>POST /api/courses/{courseId}/videos/link</li>
+</ul>
 
-### Admin APIs
-- `GET /api/admin/overview` - Get platform overview
-- `GET /api/admin/users` - Get all users
-- `PUT /api/admin/users/{userId}/role` - Update user role
-- `DELETE /api/admin/users/{userId}` - Delete user
+<h3>Admin APIs</h3>
+<ul>
+    <li>GET /api/admin/overview</li>
+    <li>GET /api/admin/users</li>
+    <li>PUT /api/admin/users/{userId}/role</li>
+    <li>DELETE /api/admin/users/{userId}</li>
+</ul>
 
-### Performance APIs
-- `GET /api/performance/overview` - Get performance overview
-- `GET /api/performance/recent-attempts` - Get recent exam attempts
+<h3>Course APIs</h3>
+<ul>
+    <li>GET /api/courses</li>
+    <li>GET /api/courses/{id}</li>
+    <li>PUT /api/courses/{id}</li>
+    <li>DELETE /api/courses/{id}</li>
+</ul>
 
-### Course APIs
-- `GET /api/courses` - Get all courses
-- `GET /api/courses/{id}` - Get course by ID
-- `PUT /api/courses/{id}` - Update course
-- `DELETE /api/courses/{id}` - Delete course
+<hr>
 
-## Authentication
+<h2>Video Management</h2>
 
-All protected endpoints require a JWT token in the Authorization header:
+<p>
+Videos can be uploaded locally or linked from external sources like YouTube.
+</p>
 
-```
-Authorization: Bearer <token>
-```
+<h3>Local Storage</h3>
+<pre>uploads/videos/</pre>
 
-## Video Upload
-
-Videos are stored in the `uploads/videos` directory (configurable in `application.properties`).
-
-For YouTube/external links, use the `/api/courses/{courseId}/videos/link` endpoint with:
-```json
+<h3>External Video Example</h3>
+<pre>
 {
-  "title": "Video Title",
-  "description": "Description",
+  "title": "Spring Boot Basics",
+  "description": "Introduction video",
   "videoType": "YOUTUBE",
-  "externalUrl": "https://www.youtube.com/watch?v=..."
+  "externalUrl": "https://www.youtube.com/watch?v=xxxx"
 }
-```
+</pre>
 
-## Frontend Integration
+<hr>
 
-The frontend is configured to connect to `http://localhost:8080/api`. Update the `API_BASE_URL` in `Frontend/react-frontend/src/utils/auth.js` if your backend runs on a different port.
+<h2>How to Run the Backend</h2>
 
-## Security
+<pre>
+mvn clean install
+mvn spring-boot:run
+</pre>
 
-- All passwords are encrypted using BCrypt
-- JWT tokens expire after 24 hours (configurable)
-- Role-based access control enforced on all endpoints
-- CORS configured for frontend origins
+<p>
+Server URL:
+</p>
 
-## Development
+<pre>
+http://localhost:8080
+</pre>
 
-- The application uses Hibernate auto-update mode (`spring.jpa.hibernate.ddl-auto=update`)
-- SQL queries are logged in console for debugging
-- Hot reload enabled with Spring Boot DevTools
+<hr>
 
-## Notes
+<h2>Testing Using Postman</h2>
 
-- Make sure MySQL is running before starting the application
-- The `uploads/videos` directory will be created automatically on first video upload
-- Default JWT secret should be changed in production
+<ol>
+    <li>Register a user</li>
+    <li>Login and get JWT token</li>
+    <li>Add token to Authorization header</li>
+    <li>Call protected APIs</li>
+</ol>
 
+<hr>
+
+<h2>Security Features</h2>
+
+<ul>
+    <li>BCrypt password encryption</li>
+    <li>JWT-based authentication</li>
+    <li>Stateless session management</li>
+    <li>Role-based API protection</li>
+    <li>CORS configuration for frontend</li>
+</ul>
+
+<hr>
+
+<h2>Conclusion</h2>
+
+<p>
+SkillForge Backend is a secure, scalable, and role-based backend system built using
+Spring Boot and MySQL. It follows clean architecture principles and supports
+real-world learning platform requirements.
+</p>
