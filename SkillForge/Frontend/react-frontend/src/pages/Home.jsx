@@ -4,15 +4,65 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Login from './Login';
 import Signup from './Signup';
+<<<<<<< HEAD
+=======
+import ContactSection from '../components/ContactSection';
+>>>>>>> aacea16 (Merge TempBranch changes)
 
 const Home = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignupOpen, setIsSignupOpen] = useState(false);
 
+<<<<<<< HEAD
   const handleContactSubmit = (e) => {
     e.preventDefault();
     alert('Thank you for contacting SkillForge. We will get back to you soon.');
     e.target.reset();
+=======
+  const [formSuccess, setFormSuccess] = useState('');
+  const [formError, setFormError] = useState('');
+
+  const handleContactSubmit = async (data) => {
+    setFormError('');
+    setFormSuccess('');
+
+    
+    if (!data?.name || !data?.email || !data?.message) {
+      setFormError('Please fill in all required fields.');
+      return false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(data.email.trim())) {
+      setFormError('Please enter a valid email address.');
+      return false;
+    }
+
+    const message = {
+      id: `msg_${Date.now()}`,
+      name: data.name.trim(),
+      email: data.email.trim(),
+      role: data.role || 'Student',
+      message: data.message.trim(),
+      createdAt: new Date().toISOString(),
+      status: 'new',
+    };
+
+    try {
+      
+      const inboxKey = 'skillforge_contact_inbox';
+      const existing = JSON.parse(localStorage.getItem(inboxKey) || '[]');
+      existing.unshift(message); // newest first
+      localStorage.setItem(inboxKey, JSON.stringify(existing));
+
+      setFormSuccess('Thanks — your message has been received. We will contact you soon.');
+      return true;
+    } catch (err) {
+      console.error('Saving contact message failed', err);
+      setFormError('Something went wrong while sending your message. Please try again.');
+      return false;
+    }
+>>>>>>> aacea16 (Merge TempBranch changes)
   };
 
   return (
@@ -149,6 +199,7 @@ const Home = () => {
       <section id="features">
         <div className="container">
           <div className="section-heading">
+<<<<<<< HEAD
             <h2>Features & Benefits</h2>
             <p>Everything you need to design, deliver, and analyse adaptive learning and exams on one platform.</p>
           </div>
@@ -183,6 +234,44 @@ const Home = () => {
               <h3>Exam Integrity & Settings</h3>
               <p>Control time limits, shuffling, negative marking, and attempt rules in a few clicks.</p>
               <span className="card-tag">Benefit: Flexible assessments</span>
+=======
+            <h2>Platform Features</h2>
+            <p>Everything you need to run adaptive learning and assessments in one place.</p>
+          </div>
+
+          <div className="feature-grid">
+            <div className="feature-card">
+              <div className="pill">Assessment</div>
+              <h3>AI Exam Builder</h3>
+              <p>Create balanced exams with tags for topics, difficulty, and outcomes. Auto-generate variants in seconds.</p>
+              <ul>
+                <li>Blueprint-based generation</li>
+                <li>Time limits and retake rules</li>
+                <li>Instant scoring</li>
+              </ul>
+            </div>
+
+            <div className="feature-card">
+              <div className="pill">Analytics</div>
+              <h3>Skill Radar</h3>
+              <p>Live dashboards for accuracy, speed, and concept mastery across cohorts or individual learners.</p>
+              <ul>
+                <li>Weak-area detection</li>
+                <li>Progress over time</li>
+                <li>Exportable reports</li>
+              </ul>
+            </div>
+
+            <div className="feature-card">
+              <div className="pill">Collaboration</div>
+              <h3>Instructor Workspace</h3>
+              <p>Manage batches, assign practice, review attempts, and leave inline feedback on questions.</p>
+              <ul>
+                <li>Batch-level insights</li>
+                <li>Assignment scheduling</li>
+                <li>Role-based access</li>
+              </ul>
+>>>>>>> aacea16 (Merge TempBranch changes)
             </div>
           </div>
         </div>
@@ -192,12 +281,18 @@ const Home = () => {
       <section id="courses">
         <div className="container">
           <div className="section-heading">
+<<<<<<< HEAD
             <h2>Courses You Can Power with SkillForge</h2>
             <p>Use SkillForge for placement prep, semester subjects, internal tests, or skill-based micro-courses.</p>
+=======
+            <h2>Popular Course Tracks</h2>
+            <p>Ready-made tracks to help students and teams ramp up faster.</p>
+>>>>>>> aacea16 (Merge TempBranch changes)
           </div>
 
           <div className="course-grid">
             <div className="course-card">
+<<<<<<< HEAD
               <span className="badge-small">Placement Prep</span>
               <h3>Java + DSA Foundations</h3>
               <p className="course-meta">Ideal for coding rounds, online assessments, and campus placements.</p>
@@ -255,6 +350,34 @@ const Home = () => {
               <div className="course-footer">
                 <span>Daily goals</span>
                 <span>Streaks</span>
+=======
+              <span className="pill">Development</span>
+              <h3>Full-Stack Java</h3>
+              <p>Spring Boot, REST, JPA, testing, and CI/CD fundamentals with adaptive practice exams.</p>
+              <div className="course-meta">
+                <span>12 modules</span>
+                <span>Projects + exams</span>
+              </div>
+            </div>
+
+            <div className="course-card">
+              <span className="pill">Data</span>
+              <h3>Data Structures & Algorithms</h3>
+              <p>Adaptive question sets on arrays, trees, graphs, DP, and complexity analysis.</p>
+              <div className="course-meta">
+                <span>150+ questions</span>
+                <span>Timed mocks</span>
+              </div>
+            </div>
+
+            <div className="course-card">
+              <span className="pill">Cloud</span>
+              <h3>DevOps Foundations</h3>
+              <p>CI/CD pipelines, Docker, Kubernetes basics, and reliability drills with scenario-based quizzes.</p>
+              <div className="course-meta">
+                <span>8 labs</span>
+                <span>Checkpoints</span>
+>>>>>>> aacea16 (Merge TempBranch changes)
               </div>
             </div>
           </div>
@@ -262,6 +385,7 @@ const Home = () => {
       </section>
 
       {/* AI Engine Section */}
+<<<<<<< HEAD
       <section id="ai">
         <div className="container">
           <div className="section-heading">
@@ -390,11 +514,42 @@ const Home = () => {
                 </button>
                 <p className="muted" style={{ marginTop: '8px' }}>Our team will get back to you with more details.</p>
               </form>
+=======
+      <section id="ai" className="ai-section">
+        <div className="container">
+          <div className="section-heading">
+            <h2>AI Engine</h2>
+            <p>How SkillForge adapts to every learner.</p>
+          </div>
+
+          <div className="ai-grid">
+            <div className="ai-card">
+              <h3>Dynamic Difficulty</h3>
+              <p>Adjusts question difficulty after each attempt using rolling accuracy and time-to-answer.</p>
+            </div>
+            <div className="ai-card">
+              <h3>Recommendation Graph</h3>
+              <p>Maps skills to prerequisites to suggest the next best module or micro-lesson.</p>
+            </div>
+            <div className="ai-card">
+              <h3>Generative Exams</h3>
+              <p>Builds balanced mocks from tagged banks; prevents overlap and keeps variants fresh.</p>
+            </div>
+            <div className="ai-card">
+              <h3>Feedback Loops</h3>
+              <p>Captures question-level feedback to improve future recommendations and item quality.</p>
+>>>>>>> aacea16 (Merge TempBranch changes)
             </div>
           </div>
         </div>
       </section>
 
+<<<<<<< HEAD
+=======
+      {/* Contact Section (component) */}
+      <ContactSection onSubmit={handleContactSubmit} />
+
+>>>>>>> aacea16 (Merge TempBranch changes)
       <Footer />
 
       {/* Modals */}
