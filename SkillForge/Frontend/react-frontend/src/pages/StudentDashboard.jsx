@@ -56,12 +56,11 @@ const StudentDashboard = () => {
             </div>
 
             <div className="dash-title">
-              <strong>Student Dashboard</strong><br />
-              <span className="muted">Personalised workspace for your learning journey</span>
+              <strong>Student Dashboard</strong>
             </div>
 
             <div className="user-area">
-              <span className="muted">Student</span>
+              <span className="muted">{user?.name || 'Student'}</span>
               <button className="btn btn-outline logout-btn" onClick={handleLogout}>
                 Logout
               </button>

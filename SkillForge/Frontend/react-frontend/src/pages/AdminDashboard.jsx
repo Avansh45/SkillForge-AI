@@ -56,12 +56,11 @@ const AdminDashboard = () => {
             </div>
 
             <div className="dash-title">
-              <strong>Admin Dashboard</strong><br />
-              <span className="muted">Monitor usage, assessments and institute-wide activity</span>
+              <strong>Admin Dashboard</strong>
             </div>
 
             <div className="user-area">
-              <span className="muted">Admin</span>
+              <span className="muted">{user?.name || 'Admin'}</span>
               <button className="btn btn-outline logout-btn" onClick={handleLogout}>
                 Logout
               </button>
