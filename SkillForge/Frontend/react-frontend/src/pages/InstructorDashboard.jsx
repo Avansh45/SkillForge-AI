@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { getUserSession, logout } from '../utils/auth';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import Settings from './Settings';
 
 const InstructorDashboard = () => {
   const [activeSection, setActiveSection] = useState('overview');
@@ -24,6 +25,10 @@ const InstructorDashboard = () => {
   };
 
   const handleSectionChange = (targetKey) => {
+    if (targetKey === 'settings') {
+      navigate('/settings');
+      return;
+    }
     setActiveSection(targetKey);
     const block = document.querySelector(`[data-section="${targetKey}"]`);
     if (block && headerRef.current) {
@@ -81,7 +86,6 @@ const InstructorDashboard = () => {
         <main className="dashboard-main">
           <div className="container">
           <section id="instructorSection">
-            {/* Overview Section */}
             <div className="section-block" data-section="overview">
               <span className="pill">Instructor dashboard</span>
               <h1 className="section-block-title">Teaching overview</h1>
@@ -149,7 +153,6 @@ const InstructorDashboard = () => {
               </div>
             </div>
 
-            {/* Courses Section */}
             <div className="section-block" data-section="courses">
               <h2 className="section-block-title">Course & Content Management</h2>
               <p className="section-block-sub">
@@ -206,7 +209,6 @@ const InstructorDashboard = () => {
               </div>
             </div>
 
-            {/* Exams Section */}
             <div className="section-block" data-section="exams">
               <h2 className="section-block-title">Exam Management</h2>
               <p className="section-block-sub">
@@ -258,7 +260,6 @@ const InstructorDashboard = () => {
               </div>
             </div>
 
-            {/* Analytics Section */}
             <div className="section-block" data-section="analytics">
               <h2 className="section-block-title">Class Performance Analytics</h2>
               <p className="section-block-sub">
@@ -289,6 +290,27 @@ const InstructorDashboard = () => {
 
                 <div>
                   <div className="card">
+                    <h3>Learning Preferences</h3>
+                    <p className="card-sub">How the system schedules and recommends practice.</p>
+                    <ul className="list">
+                      <li>
+                        <span>Daily practice time</span>
+                        <span className="label">20–40 mins</span>
+                      </li>
+                      <li>
+                        <span>Difficulty mode</span>
+                        <span className="label">Adaptive · Medium → Hard</span>
+                      </li>
+                      <li>
+                        <span>Reminder window</span>
+                        <span className="label">Evening · 7 PM – 10 PM</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="card">
                     <h3>Students Needing Support</h3>
                     <p className="card-sub">Shortlist of students based on exam history.</p>
                     <ul className="list">
@@ -310,81 +332,6 @@ const InstructorDashboard = () => {
               </div>
             </div>
 
-            {/* Settings Section */}
-            <div className="section-block" data-section="settings">
-              <h2 className="section-block-title">Instructor Settings</h2>
-              <p className="section-block-sub">
-                Configure defaults for your exams and communication.
-              </p>
-
-              <div className="grid">
-                <div>
-                  <div className="card">
-                    <h3>Account</h3>
-                    <p className="card-sub">Basic information linked to your instructor profile.</p>
-                    <ul className="list">
-                      <li>
-                        <span>Full name</span>
-                        <span className="label">{user?.name || '-'}</span>
-                      </li>
-                      <li>
-                        <span>Registered email</span>
-                        <span className="label">{user?.email || '-'}</span>
-                      </li>
-                      <li>
-                        <span>Role</span>
-                        <span className="label">Instructor</span>
-                      </li>
-                    </ul>
-                    <div style={{ marginTop: '10px', textAlign: 'right' }}>
-                      <button className="btn btn-outline logout-btn" onClick={handleLogout}>
-                        Logout
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="card">
-                    <h3>Exam Defaults</h3>
-                    <p className="card-sub">Standard settings applied to new exams.</p>
-                    <ul className="list">
-                      <li>
-                        <span>Negative marking</span>
-                        <span className="label">-0.25 for wrong answers</span>
-                      </li>
-                      <li>
-                        <span>Question shuffle</span>
-                        <span className="label">Enabled for all exams</span>
-                      </li>
-                      <li>
-                        <span>Result visibility</span>
-                        <span className="label">Instant with solution view</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="card">
-                    <h3>Communication & Notifications</h3>
-                    <p className="card-sub">How students receive updates.</p>
-                    <ul className="list">
-                      <li>
-                        <span>Exam alerts</span>
-                        <span className="label">Email + in-app notification</span>
-                      </li>
-                      <li>
-                        <span>Reminder schedule</span>
-                        <span className="label">24 hrs & 2 hrs before exam</span>
-                      </li>
-                      <li>
-                        <span>Feedback forms</span>
-                        <span className="label">After every major exam</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
           </section>
           </div>
         </main>

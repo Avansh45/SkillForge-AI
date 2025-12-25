@@ -3,6 +3,7 @@ package com.skillforge.controller;
 import com.skillforge.dto.AuthRequest;
 import com.skillforge.dto.AuthResponse;
 import com.skillforge.dto.RegisterRequest;
+import com.skillforge.dto.ChangePasswordRequest;
 import com.skillforge.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,15 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
         AuthResponse response = authService.register(request);
+        if (response.getToken() == null) {
+            return ResponseEntity.badRequest().body(response);
+        }
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<AuthResponse> changePassword(@RequestBody ChangePasswordRequest request, @RequestParam String email) {
+        AuthResponse response = authService.changePassword(email, request);
         if (response.getToken() == null) {
             return ResponseEntity.badRequest().body(response);
         }

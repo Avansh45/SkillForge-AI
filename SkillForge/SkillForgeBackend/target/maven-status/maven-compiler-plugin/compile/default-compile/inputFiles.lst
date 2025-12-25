@@ -29,6 +29,7 @@ C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\SkillForgeBackendApplication.java
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\controller\ContactController.java
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\security\JwtUtil.java
+C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\dto\ChangePasswordRequest.java
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\dto\CourseRequest.java
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\service\VideoService.java
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\entity\Course.java

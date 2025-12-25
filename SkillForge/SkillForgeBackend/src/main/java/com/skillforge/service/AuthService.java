@@ -3,6 +3,7 @@ package com.skillforge.service;
 import com.skillforge.dto.AuthRequest;
 import com.skillforge.dto.AuthResponse;
 import com.skillforge.dto.RegisterRequest;
+import com.skillforge.dto.ChangePasswordRequest;
 import com.skillforge.entity.User;
 import com.skillforge.repository.UserRepository;
 import com.skillforge.security.JwtUtil;
@@ -44,6 +45,20 @@ public class AuthService {
 
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
         return new AuthResponse(token, user.getEmail(), user.getName(), user.getRole().name(), "Registration successful");
+    }
+
+    public AuthResponse changePassword(String email, ChangePasswordRequest request) {
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            return new AuthResponse(null, null, null, null, "User not found");
+        }
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            return new AuthResponse(null, null, null, null, "Old password is incorrect");
+        }
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
+        return new AuthResponse(token, user.getEmail(), user.getName(), user.getRole().name(), "Password changed successfully");
     }
 
     public AuthResponse login(AuthRequest request) {

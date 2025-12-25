@@ -1,10 +1,18 @@
 // src/components/Navbar.jsx
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 
 const Navbar = ({ items, activeSection, onSectionChange }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleNavClick = (targetKey) => {
+    if (targetKey === 'settings') {
+      navigate('/settings');
+      setIsOpen(false);
+      return;
+    }
     onSectionChange(targetKey);
     setIsOpen(false);
   };

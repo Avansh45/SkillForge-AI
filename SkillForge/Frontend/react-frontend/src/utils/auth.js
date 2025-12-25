@@ -1,3 +1,37 @@
+// Change password
+export const changePassword = async (email, oldPassword, newPassword) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/change-password?email=${encodeURIComponent(email)}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ oldPassword, newPassword }),
+    });
+    const data = await response.json();
+    if (!response.ok || !data.token) {
+      return {
+        success: false,
+        error: data.message || 'Password change failed',
+      };
+    }
+    // Save new session
+    saveUserSession(data.token, data.role, data.name, data.email);
+    return {
+      success: true,
+      user: {
+        role: data.role,
+        name: data.name,
+        email: data.email,
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: 'Network error. Please try again.',
+    };
+  }
+};
 // src/utils/auth.js
 
 const API_BASE_URL = 'http://localhost:8080/api';

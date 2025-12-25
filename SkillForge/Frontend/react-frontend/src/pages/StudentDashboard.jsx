@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { getUserSession, logout } from '../utils/auth';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import Settings from './Settings';
 
 const StudentDashboard = () => {
   const [activeSection, setActiveSection] = useState('overview');
@@ -24,6 +25,10 @@ const StudentDashboard = () => {
   };
 
   const handleSectionChange = (targetKey) => {
+    if (targetKey === 'settings') {
+      navigate('/settings');
+      return;
+    }
     setActiveSection(targetKey);
     const block = document.querySelector(`[data-section="${targetKey}"]`);
     if (block && headerRef.current) {
@@ -289,6 +294,27 @@ const StudentDashboard = () => {
 
                 <div>
                   <div className="card">
+                    <h3>Learning Preferences</h3>
+                    <p className="card-sub">How the system schedules and recommends practice.</p>
+                    <ul className="list">
+                      <li>
+                        <span>Daily practice time</span>
+                        <span className="label">20–40 mins</span>
+                      </li>
+                      <li>
+                        <span>Difficulty mode</span>
+                        <span className="label">Adaptive · Medium → Hard</span>
+                      </li>
+                      <li>
+                        <span>Reminder window</span>
+                        <span className="label">Evening · 7 PM – 10 PM</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="card">
                     <h3>Recommendations</h3>
                     <p className="card-sub">Next actions generated from your recent history.</p>
                     <ul className="list">
@@ -310,65 +336,6 @@ const StudentDashboard = () => {
               </div>
             </div>
 
-            {/* Settings Section */}
-            <div className="section-block" data-section="settings">
-              <h2 className="section-block-title">Profile & Preferences</h2>
-              <p className="section-block-sub">
-                Configure how you want SkillForge to guide your learning.
-              </p>
-
-              <div className="grid">
-                <div>
-                  <div className="card">
-                    <h3>Account</h3>
-                    <p className="card-sub">Basic information linked to your profile.</p>
-                    <ul className="list">
-                      <li>
-                        <span>Full name</span>
-                        <span className="label">{user?.name || '-'}</span>
-                      </li>
-                      <li>
-                        <span>Registered email</span>
-                        <span className="label">{user?.email || '-'}</span>
-                      </li>
-                      <li>
-                        <span>Role</span>
-                        <span className="label">Student</span>
-                      </li>
-                      <li>
-                        <span>Goal</span>
-                        <span className="label">Campus placements</span>
-                      </li>
-                    </ul>
-                    <div style={{ marginTop: '10px', textAlign: 'right' }}>
-                      <button className="btn btn-outline logout-btn" onClick={handleLogout}>
-                        Logout
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <div className="card">
-                    <h3>Learning Preferences</h3>
-                    <p className="card-sub">How the system schedules and recommends practice.</p>
-                    <ul className="list">
-                      <li>
-                        <span>Daily practice time</span>
-                        <span className="label">20–40 mins</span>
-                      </li>
-                      <li>
-                        <span>Difficulty mode</span>
-                        <span className="label">Adaptive · Medium → Hard</span>
-                      </li>
-                      <li>
-                        <span>Reminder window</span>
-                        <span className="label">Evening · 7 PM – 10 PM</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
           </section>
           </div>
         </main>

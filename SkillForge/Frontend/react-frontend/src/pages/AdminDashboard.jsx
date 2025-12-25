@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { getUserSession, logout } from '../utils/auth';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import Settings from './Settings';
 
 const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState('overview');
@@ -24,6 +25,10 @@ const AdminDashboard = () => {
   };
 
   const handleSectionChange = (targetKey) => {
+    if (targetKey === 'settings') {
+      navigate('/settings');
+      return;
+    }
     setActiveSection(targetKey);
     const block = document.querySelector(`[data-section="${targetKey}"]`);
     if (block && headerRef.current) {
@@ -288,6 +293,27 @@ const AdminDashboard = () => {
 
                 <div>
                   <div className="card">
+                    <h3>Learning Preferences</h3>
+                    <p className="card-sub">How the system schedules and recommends practice.</p>
+                    <ul className="list">
+                      <li>
+                        <span>Daily practice time</span>
+                        <span className="label">20–40 mins</span>
+                      </li>
+                      <li>
+                        <span>Difficulty mode</span>
+                        <span className="label">Adaptive · Medium → Hard</span>
+                      </li>
+                      <li>
+                        <span>Reminder window</span>
+                        <span className="label">Evening · 7 PM – 10 PM</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="card">
                     <h3>Risk Indicators</h3>
                     <p className="card-sub">Signals where intervention may be needed.</p>
                     <ul className="list">
@@ -309,81 +335,6 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            {/* Settings Section */}
-            <div className="section-block" data-section="settings">
-              <h2 className="section-block-title">Admin Controls</h2>
-              <p className="section-block-sub">
-                Configure platform-wide defaults and manage access.
-              </p>
-
-              <div className="grid">
-                <div>
-                  <div className="card">
-                    <h3>Account</h3>
-                    <p className="card-sub">Details of your admin profile.</p>
-                    <ul className="list">
-                      <li>
-                        <span>Full name</span>
-                        <span className="label">{user?.name || '-'}</span>
-                      </li>
-                      <li>
-                        <span>Registered email</span>
-                        <span className="label">{user?.email || '-'}</span>
-                      </li>
-                      <li>
-                        <span>Role</span>
-                        <span className="label">Admin</span>
-                      </li>
-                    </ul>
-                    <div style={{ marginTop: '10px', textAlign: 'right' }}>
-                      <button className="btn btn-outline logout-btn" onClick={handleLogout}>
-                        Logout
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="card">
-                    <h3>User & Role Management</h3>
-                    <p className="card-sub">Control who can access what.</p>
-                    <ul className="list">
-                      <li>
-                        <span>Pending instructor approvals</span>
-                        <span className="label">3 requests</span>
-                      </li>
-                      <li>
-                        <span>Role change requests</span>
-                        <span className="label">2 awaiting review</span>
-                      </li>
-                      <li>
-                        <span>Deactivated accounts</span>
-                        <span className="label">5 accounts</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div>
-                  <div className="card">
-                    <h3>Platform Settings</h3>
-                    <p className="card-sub">Key configuration options.</p>
-                    <ul className="list">
-                      <li>
-                        <span>Default timezone</span>
-                        <span className="label">Institute local time</span>
-                      </li>
-                      <li>
-                        <span>Data export</span>
-                        <span className="label">Monthly reports to admin email</span>
-                      </li>
-                      <li>
-                        <span>Support contact</span>
-                        <span className="label">support@skillforge.institute</span>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
           </section>
           </div>
         </main>

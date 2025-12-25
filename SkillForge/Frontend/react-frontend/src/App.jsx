@@ -4,17 +4,34 @@ import Home from './pages/Home';
 import StudentDashboard from './pages/StudentDashboard';
 import InstructorDashboard from './pages/InstructorDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import SettingsPage from './pages/SettingsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute requiredRole={null}>
+              <SettingsPage />
+            </ProtectedRoute>
+          }
+        />
+
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* Public Route */}
         <Route path="/" element={<Home />} />
 
-        {/* Protected Routes - Student */}
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute requiredRole={null}>
+              <SettingsPage />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/student-dashboard"
           element={
@@ -24,7 +41,6 @@ function App() {
           }
         />
 
-        {/* Protected Routes - Instructor */}
         <Route
           path="/instructor-dashboard"
           element={
@@ -34,7 +50,6 @@ function App() {
           }
         />
 
-        {/* Protected Routes - Admin */}
         <Route
           path="/admin-dashboard"
           element={
@@ -44,7 +59,6 @@ function App() {
           }
         />
 
-        {/* Fallback route - redirect to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

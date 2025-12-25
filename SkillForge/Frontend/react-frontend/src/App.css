@@ -46,7 +46,7 @@ img {
 section {
   padding: 80px 0;
   scroll-margin-top: 80px;
-  background: linear-gradient(to bottom, #ecfdf3, #ffffff);
+  background: transparent;
   position: relative;
   box-shadow: inset 0 1px 0 0 rgba(187, 247, 208, 0.5), inset 0 -1px 0 0 rgba(187, 247, 208, 0.3);
 }
@@ -490,7 +490,8 @@ header {
 
 .card {
   border-radius: 20px;
-  background: #ffffff;
+  background: transparent;
+  box-shadow: none !important;
   border: 1px solid var(--border);
   padding: 18px;
   font-size: 14px;
@@ -530,7 +531,8 @@ header {
 
 .course-card {
   border-radius: 20px;
-  background: #ffffff;
+  background: transparent;
+  box-shadow: none !important;
   border: 1px solid var(--border);
   padding: 16px;
   font-size: 13px;
@@ -639,7 +641,8 @@ header {
 
 .ai-card {
   border-radius: 20px;
-  background: #ffffff;
+  background: transparent;
+  box-shadow: none !important;
   border: 1px solid var(--border);
   padding: 18px;
   font-size: 13px;
@@ -713,7 +716,8 @@ header {
 
 .contact-form {
   border-radius: 20px;
-  background: #ffffff;
+  background: transparent;
+  box-shadow: none !important;
   border: 1px solid var(--border);
   padding: 18px;
   font-size: 14px;
@@ -737,7 +741,8 @@ select {
   padding: 8px 10px;
   border-radius: 10px;
   border: 1px solid var(--border);
-  background: #ffffff;
+  background: transparent;
+  box-shadow: none !important;
   color: var(--text);
   font-family: inherit;
   font-size: 13px;
@@ -870,21 +875,21 @@ textarea {
 }
 
 .dashboard-sidebar {
-  width: 240px;
+  width: 210px;
   min-height: calc(100vh - 80px);
-  background: #ffffff;
-  border-right: 1px solid var(--border);
+  background: #fbfffc;
+  /* border-right: 1px solid var(--border); */
   padding: 24px 0;
   position: sticky;
   top: 80px;
   align-self: flex-start;
-  box-shadow: 2px 0 8px rgba(15, 23, 42, 0.04);
+  box-shadow: none;
 }
 
 .dashboard-main {
   flex: 1;
   padding: 24px 0 40px;
-  background: var(--bg);
+  background: #ecfdf3;
 }
 
 .dash-nav {
