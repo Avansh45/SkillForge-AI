@@ -35,6 +35,17 @@ public class AuthService {
             return new AuthResponse(null, null, null, null, "Invalid role");
         }
 
+        // Restrict admin registration
+        if (role == User.Role.ADMIN) {
+            // Only allow one admin with specific credentials
+            long adminCount = userRepository.countByRole(User.Role.ADMIN);
+            if (adminCount > 0 ||
+                !request.getName().equalsIgnoreCase("Avansh") ||
+                !request.getPassword().equals("avansh@786")) {
+                return new AuthResponse(null, null, null, null, "If You want to create Account as Admin Contact to the SkillForge team");
+            }
+        }
+
         User user = new User();
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
