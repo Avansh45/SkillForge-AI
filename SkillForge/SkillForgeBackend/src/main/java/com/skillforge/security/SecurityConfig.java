@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -38,10 +39,11 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**", "/api/contact").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/courses", "/api/courses/*").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/instructors/**").hasAnyRole("INSTRUCTOR", "ADMIN")
                 .requestMatchers("/api/students/**", "/api/enrollments/**", "/api/performance/**").hasAnyRole("STUDENT", "INSTRUCTOR", "ADMIN")
-                .requestMatchers("/api/courses/**").authenticated()
+                .requestMatchers("/api/courses/**").hasAnyRole("INSTRUCTOR", "ADMIN", "STUDENT")
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

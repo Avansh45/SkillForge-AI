@@ -19,7 +19,7 @@ const Login = ({ isOpen, onClose }) => {
       return;
     }
 
-    const result = await loginUser(role, email.trim(), password.trim());
+    const result = await loginUser(email.trim(), password.trim(), role);
 
     if (!result.success) {
       setError(result.error);

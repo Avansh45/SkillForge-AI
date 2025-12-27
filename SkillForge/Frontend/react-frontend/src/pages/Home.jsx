@@ -1,17 +1,67 @@
-// src/pages/Home.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Login from './Login';
 import Signup from './Signup';
 import ContactSection from '../components/ContactSection';
+import { useCourses } from '../hooks';
+import { enrollInCourse } from '../api/studentService';
+import { getUserSession } from '../utils/auth';
 
 const Home = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignupOpen, setIsSignupOpen] = useState(false);
-
   const [formSuccess, setFormSuccess] = useState('');
   const [formError, setFormError] = useState('');
+  const [enrolling, setEnrolling] = useState(null);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+  
+  // Use custom hook for courses
+  const { courses, loading: loadingCourses, error: coursesError } = useCourses();
+
+  // Fetch user session on mount
+  useEffect(() => {
+    const currentUser = getUserSession();
+    setUser(currentUser);
+  }, []);
+
+  const handleCourseClick = (course) => {
+    if (!user) {
+      setIsLoginOpen(true);
+      return;
+    }
+    // If user is student, stay on page to enroll
+    // If instructor/admin, could navigate to dashboard
+    if (user.role !== 'STUDENT') {
+      navigate(`/${user.role.toLowerCase()}`);
+    }
+  };
+
+  const handleEnroll = async (courseId, e) => {
+    e.stopPropagation();
+    
+    if (!user) {
+      setIsLoginOpen(true);
+      return;
+    }
+
+    if (user.role !== 'STUDENT') {
+      alert('⚠️ Only students can enroll in courses');
+      return;
+    }
+
+    setEnrolling(courseId);
+    try {
+      await enrollInCourse(courseId);
+      alert('✅ Successfully enrolled in course! Check your Student Dashboard.');
+    } catch (err) {
+      alert('❌ ' + (err.message || 'Failed to enroll. You may already be enrolled.'));
+    } finally {
+      setEnrolling(null);
+    }
+  };
 
   const handleContactSubmit = async (data) => {
     setFormError('');
@@ -238,37 +288,67 @@ const Home = () => {
             <p>Ready-made tracks to help students and teams ramp up faster.</p>
           </div>
 
-          <div className="course-grid">
-            <div className="course-card">
-              <span className="pill">Development</span>
-              <h3>Full-Stack Java</h3>
-              <p>Spring Boot, REST, JPA, testing, and CI/CD fundamentals with adaptive practice exams.</p>
-              <div className="course-meta">
-                <span>12 modules</span>
-                <span>Projects + exams</span>
-              </div>
+          {loadingCourses ? (
+            <div style={{ padding: '4rem 0', textAlign: 'center', color: '#666' }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '1rem', animation: 'spin 1s linear infinite' }}>⏳</div>
+              <p style={{ fontSize: '1.125rem', margin: 0 }}>Loading courses...</p>
             </div>
-
-            <div className="course-card">
-              <span className="pill">Data</span>
-              <h3>Data Structures & Algorithms</h3>
-              <p>Adaptive question sets on arrays, trees, graphs, DP, and complexity analysis.</p>
-              <div className="course-meta">
-                <span>150+ questions</span>
-                <span>Timed mocks</span>
-              </div>
+          ) : coursesError ? (
+            <div style={{ padding: '3rem', textAlign: 'center', background: '#ffebee', borderRadius: '12px', border: '1px solid #ffcdd2' }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>⚠️</div>
+              <p style={{ color: '#d32f2f', fontWeight: '500', marginBottom: '0.5rem' }}>Failed to load courses</p>
+              <p style={{ color: '#666', fontSize: '0.875rem', margin: 0 }}>{coursesError}</p>
             </div>
-
-            <div className="course-card">
-              <span className="pill">Cloud</span>
-              <h3>DevOps Foundations</h3>
-              <p>CI/CD pipelines, Docker, Kubernetes basics, and reliability drills with scenario-based quizzes.</p>
-              <div className="course-meta">
-                <span>8 labs</span>
-                <span>Checkpoints</span>
-              </div>
+          ) : courses.length === 0 ? (
+            <div style={{ padding: '4rem 0', textAlign: 'center', color: '#666' }}>
+              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📚</div>
+              <p style={{ fontSize: '1.25rem', fontWeight: '500', marginBottom: '0.5rem' }}>No courses available yet</p>
+              <p style={{ fontSize: '0.875rem', margin: 0 }}>Check back soon for new courses!</p>
             </div>
-          </div>
+          ) : (
+            <div className="course-grid">
+              {courses.map((course) => (
+                <div 
+                  key={course.id} 
+                  className="course-card"
+                  onClick={() => handleCourseClick(course)}
+                  style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                >
+                  <span className="pill">Course</span>
+                  <h3>{course.title}</h3>
+                  <p>{course.description || 'Comprehensive course content designed for effective learning.'}</p>
+                  <div className="course-meta">
+                    {course.instructor?.name && (
+                      <span>👨‍🏫 {course.instructor.name}</span>
+                    )}
+                    <span>ID: {course.id}</span>
+                  </div>
+                  {user?.role === 'STUDENT' && (
+                    <button
+                      className="btn btn-primary"
+                      onClick={(e) => handleEnroll(course.id, e)}
+                      disabled={enrolling === course.id}
+                      style={{
+                        width: '100%',
+                        marginTop: '1rem',
+                        opacity: enrolling === course.id ? 0.6 : 1,
+                        cursor: enrolling === course.id ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      {enrolling === course.id ? 'Enrolling...' : 'Enroll Now'}
+                    </button>
+                  )}
+                  {!user && (
+                    <div style={{ marginTop: '1rem', padding: '0.5rem', background: '#ecfdf3', borderRadius: '6px', fontSize: '0.875rem', color: '#16a34a' }}>
+                      👉 Login to enroll
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

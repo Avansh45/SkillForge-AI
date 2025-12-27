@@ -86,3 +86,9 @@ body{
 .section-heading h2 { margin-bottom:6px; }
 .small { font-size:13px; color:var(--muted); }
 .muted { color:var(--muted); font-size:13px; }
+
+/* Loading spinner animation */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

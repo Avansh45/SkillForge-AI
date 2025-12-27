@@ -1,0 +1,8 @@
+com\skillforge\dto\ChangePasswordRequest.class
+com\skillforge\repository\ExamRepository.class
+com\skillforge\security\JwtAuthenticationFilter.class
+com\skillforge\security\SecurityConfig.class
+com\skillforge\controller\AuthController.class
+com\skillforge\controller\StudentController.class
+com\skillforge\security\UserDetailsServiceImpl.class
+com\skillforge\controller\CourseController.class

@@ -1,23 +1,105 @@
-// src/pages/AdminDashboard.jsx
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getUserSession, logout } from '../utils/auth';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Settings from './Settings';
+import { getPlatformOverview, getAllUsers, updateUserRole, deleteUser } from '../api/adminService';
+import { useCourses } from '../hooks';
 
 const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState('overview');
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const headerRef = useRef(null);
+  
+  const [overview, setOverview] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [loadingOverview, setLoadingOverview] = useState(true);
+  const [loadingUsers, setLoadingUsers] = useState(true);
+  
+
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [newRole, setNewRole] = useState('');
+
+  const { courses, loading: loadingCourses } = useCourses();
 
   useEffect(() => {
     const currentUser = getUserSession();
     if (currentUser) {
       setUser(currentUser);
     }
+    fetchData();
   }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoadingOverview(true);
+      setLoadingUsers(true);
+      
+      console.log('Fetching admin data...');
+      const [overviewData, usersData] = await Promise.all([
+        getPlatformOverview(),
+        getAllUsers()
+      ]);
+      
+      console.log('Overview data:', overviewData);
+      console.log('Users data:', usersData);
+      
+      setOverview(overviewData);
+      setUsers(usersData || []);
+    } catch (error) {
+      console.error('Error fetching admin data:', error);
+      console.error('Error details:', error.response || error.message);
+      alert(`❌ Failed to load dashboard data: ${error.response?.data?.error || error.message}`);
+    } finally {
+      setLoadingOverview(false);
+      setLoadingUsers(false);
+    }
+  };
+
+  const handleManageUser = (user) => {
+    setSelectedUser(user);
+    setNewRole(user.role);
+    setShowUserModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowUserModal(false);
+    setSelectedUser(null);
+    setNewRole('');
+  };
+
+  const handleUpdateRole = async () => {
+    if (!selectedUser || !newRole) return;
+    
+    try {
+      await updateUserRole(selectedUser.id, newRole);
+      alert('✅ User role updated successfully!');
+      handleCloseModal();
+      fetchData(); // Refresh data
+    } catch (error) {
+      console.error('Error updating user role:', error);
+      alert('❌ Failed to update user role. Please try again.');
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      await deleteUser(userId);
+      alert('✅ User deleted successfully!');
+      handleCloseModal();
+      fetchData();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      alert('❌ Failed to delete user. Please try again.');
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -41,6 +123,7 @@ const AdminDashboard = () => {
 
   const navItems = [
     { key: 'overview', label: 'Overview' },
+    { key: 'users', label: 'Users' },
     { key: 'courses', label: 'Courses / Batches' },
     { key: 'exams', label: 'Exams' },
     { key: 'analytics', label: 'Analytics' },
@@ -99,39 +182,53 @@ const AdminDashboard = () => {
                   <div className="card">
                     <h2>Platform Summary</h2>
                     <p className="card-sub">Key numbers across your organisation.</p>
-                    <div className="stat-row">
-                      <div className="stat-pill">
-                        <strong>420</strong>
-                        Total users
+                    {loadingOverview ? (
+                      <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                        <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>⏳</div>
+                        Loading statistics...
                       </div>
-                      <div className="stat-pill">
-                        <strong>18</strong>
-                        Active batches
+                    ) : (
+                      <div className="stat-row">
+                        <div className="stat-pill">
+                          <strong>{overview?.totalUsers || 0}</strong>
+                          Total users
+                        </div>
+                        <div className="stat-pill">
+                          <strong>--</strong>
+                          Active batches
+                        </div>
+                        <div className="stat-pill">
+                          <strong>--</strong>
+                          Exams conducted this month
+                        </div>
                       </div>
-                      <div className="stat-pill">
-                        <strong>96</strong>
-                        Exams conducted this month
-                      </div>
-                    </div>
+                    )}
                   </div>
 
                   <div className="card">
                     <h3>User Roles</h3>
                     <p className="card-sub">Breakdown of user types.</p>
-                    <ul className="list">
-                      <li>
-                        <span>Students</span>
-                        <span className="label">360</span>
-                      </li>
-                      <li>
-                        <span>Instructors</span>
-                        <span className="label">42</span>
-                      </li>
-                      <li>
-                        <span>Admins</span>
-                        <span className="label">18</span>
-                      </li>
-                    </ul>
+                    {loadingOverview ? (
+                      <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                        <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>⏳</div>
+                        Loading user data...
+                      </div>
+                    ) : (
+                      <ul className="list">
+                        <li>
+                          <span>Students</span>
+                          <span className="label">{overview?.students || 0}</span>
+                        </li>
+                        <li>
+                          <span>Instructors</span>
+                          <span className="label">{overview?.instructors || 0}</span>
+                        </li>
+                        <li>
+                          <span>Admins</span>
+                          <span className="label">{overview?.admins || 0}</span>
+                        </li>
+                      </ul>
+                    )}
                   </div>
                 </div>
 
@@ -170,41 +267,80 @@ const AdminDashboard = () => {
                   <div className="card">
                     <h3>Course Catalog</h3>
                     <p className="card-sub">Active courses available to students.</p>
-                    <ul className="list">
-                      <li>
-                        <span>Java + DSA Foundations</span>
-                        <span className="label">Mapped to 4 batches</span>
-                      </li>
-                      <li>
-                        <span>Quant & Logical Reasoning</span>
-                        <span className="label">Mapped to 3 batches</span>
-                      </li>
-                      <li>
-                        <span>Verbal & English Practice</span>
-                        <span className="label">Mapped to 2 batches</span>
-                      </li>
-                    </ul>
+                    {loadingCourses ? (
+                      <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                        <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>⏳</div>
+                        Loading courses...
+                      </div>
+                    ) : courses.length === 0 ? (
+                      <div style={{ padding: '2rem', textAlign: 'center', color: '#666', background: '#f8f9fa', borderRadius: '8px' }}>
+                        <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📚</div>
+                        <p style={{ margin: 0 }}>No courses created yet</p>
+                      </div>
+                    ) : (
+                      <ul className="list">
+                        {courses.slice(0, 5).map((course) => (
+                          <li key={course.id}>
+                            <span>{course.title}</span>
+                            <span className="label">
+                              {course.instructor?.name || 'No instructor'}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <div style={{ marginTop: '1rem', padding: '0.75rem', background: '#f8f9fa', borderRadius: '8px' }}>
+                      <strong style={{ display: 'block', marginBottom: '0.25rem' }}>
+                        Total Courses: {courses.length}
+                      </strong>
+                      <span style={{ fontSize: '0.875rem', color: '#666' }}>
+                        Showing {Math.min(5, courses.length)} of {courses.length} courses
+                      </span>
+                    </div>
                   </div>
                 </div>
 
                 <div>
                   <div className="card">
-                    <h3>Batch Health Overview</h3>
-                    <p className="card-sub">High-level performance indicators.</p>
-                    <ul className="list">
-                      <li>
-                        <span>Average batch accuracy</span>
-                        <span className="label">71%</span>
-                      </li>
-                      <li>
-                        <span>Active vs inactive batches</span>
-                        <span className="label">18 active · 3 inactive</span>
-                      </li>
-                      <li>
-                        <span>Average exam participation</span>
-                        <span className="label">82% of enrolled students</span>
-                      </li>
-                    </ul>
+                    <h3>Course Instructors</h3>
+                    <p className="card-sub">Instructors and their courses.</p>
+                    {loadingCourses ? (
+                      <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                        <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>⏳</div>
+                        Loading data...
+                      </div>
+                    ) : (
+                      <ul className="list">
+                        {courses
+                          .filter(course => course.instructor?.name)
+                          .reduce((acc, course) => {
+                            const instructorName = course.instructor.name;
+                            const existing = acc.find(item => item.name === instructorName);
+                            if (existing) {
+                              existing.count++;
+                            } else {
+                              acc.push({ name: instructorName, count: 1 });
+                            }
+                            return acc;
+                          }, [])
+                          .slice(0, 5)
+                          .map((instructor, idx) => (
+                            <li key={idx}>
+                              <span>{instructor.name}</span>
+                              <span className="label">{instructor.count} course{instructor.count !== 1 ? 's' : ''}</span>
+                            </li>
+                          ))
+                        }
+                        {courses.filter(c => !c.instructor?.name).length > 0 && (
+                          <li>
+                            <span>Unassigned</span>
+                            <span className="label">
+                              {courses.filter(c => !c.instructor?.name).length} course(s)
+                            </span>
+                          </li>
+                        )}
+                      </ul>
+                    )}
                   </div>
                 </div>
               </div>
@@ -259,6 +395,82 @@ const AdminDashboard = () => {
                     </ul>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* User Management Section */}
+            <div className="section-block" data-section="users">
+              <h2 className="section-block-title">User Management</h2>
+              <p className="section-block-sub">
+                Manage all users on the platform - update roles and remove users.
+              </p>
+              
+              <div className="card">
+                {loadingUsers ? (
+                  <div style={{ padding: '3rem', textAlign: 'center', color: '#666' }}>
+                    <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>⏳</div>
+                    Loading users...
+                  </div>
+                ) : users && users.length > 0 ? (
+                  <div style={{ overflowX: 'auto' }}>
+                    <p style={{ padding: '0.5rem 0', color: '#666', fontSize: '0.875rem' }}>
+                      Showing {users.length} user(s)
+                    </p>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '2px solid #e0e0e0', textAlign: 'left' }}>
+                          <th style={{ padding: '0.75rem' }}>Name</th>
+                          <th style={{ padding: '0.75rem' }}>Email</th>
+                          <th style={{ padding: '0.75rem' }}>Role</th>
+                          <th style={{ padding: '0.75rem' }}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {users && users.length > 0 ? (
+                          users.map((u) => (
+                            <tr key={u.id} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                              <td style={{ padding: '0.75rem' }}>{u.name}</td>
+                              <td style={{ padding: '0.75rem' }}>{u.email}</td>
+                              <td style={{ padding: '0.75rem' }}>
+                                <span className="pill" style={{ 
+                                  background: u.role === 'ADMIN' ? '#3b82f6' : u.role === 'INSTRUCTOR' ? '#10b981' : '#6366f1',
+                                  color: 'white',
+                                  padding: '0.25rem 0.75rem',
+                                  borderRadius: '9999px',
+                                  fontSize: '0.75rem',
+                                  fontWeight: '500'
+                                }}>
+                                  {u.role}
+                                </span>
+                              </td>
+                              <td style={{ padding: '0.75rem' }}>
+                                <button 
+                                  className="btn btn-outline" 
+                                  style={{ marginRight: '0.5rem', padding: '0.375rem 0.75rem', fontSize: '0.875rem' }}
+                                  onClick={() => handleManageUser(u)}
+                                >
+                                  Manage
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan="4" style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                              No users found
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div style={{ padding: '3rem', textAlign: 'center', color: '#666', background: '#f8f9fa', borderRadius: '8px' }}>
+                    <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>👥</div>
+                    <p style={{ margin: 0, fontWeight: '500' }}>No users found</p>
+                    <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem' }}>Check console for errors or verify backend is running.</p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -339,6 +551,94 @@ const AdminDashboard = () => {
           </div>
         </main>
       </div>
+
+      {/* User Management Modal */}
+      {showUserModal && selectedUser && (
+        <div className="modal-backdrop" onClick={handleCloseModal}>
+          <div className="modal" style={{ maxWidth: '500px' }} onClick={(e) => e.stopPropagation()}>
+            <span className="modal-close" onClick={handleCloseModal}>×</span>
+            <h3>Manage User</h3>
+            <p style={{ color: '#666', marginBottom: '1.5rem' }}>Update role or remove user from the platform</p>
+
+            <div className="card" style={{ padding: '1rem', background: '#f8f9fa', marginBottom: '1.5rem' }}>
+              <div style={{ marginBottom: '0.5rem' }}>
+                <strong>Name:</strong> {selectedUser.name}
+              </div>
+              <div style={{ marginBottom: '0.5rem' }}>
+                <strong>Email:</strong> {selectedUser.email}
+              </div>
+              <div>
+                <strong>Current Role:</strong> 
+                <span className="pill" style={{ 
+                  marginLeft: '0.5rem',
+                  background: selectedUser.role === 'ADMIN' ? '#3b82f6' : selectedUser.role === 'INSTRUCTOR' ? '#10b981' : '#6366f1',
+                  color: 'white',
+                  padding: '0.25rem 0.75rem',
+                  borderRadius: '9999px',
+                  fontSize: '0.75rem',
+                  fontWeight: '500'
+                }}>
+                  {selectedUser.role}
+                </span>
+              </div>
+            </div>
+
+            <div className="form-row" style={{ marginBottom: '1.5rem' }}>
+              <label htmlFor="newRole">New Role</label>
+              <select
+                id="newRole"
+                value={newRole}
+                onChange={(e) => setNewRole(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '8px',
+                  fontSize: '1rem'
+                }}
+              >
+                <option value="STUDENT">Student</option>
+                <option value="INSTRUCTOR">Instructor</option>
+                <option value="ADMIN">Admin</option>
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1rem' }}>
+              <button 
+                className="btn btn-primary" 
+                onClick={handleUpdateRole}
+                style={{ flex: 1 }}
+              >
+                Update Role
+              </button>
+              <button 
+                className="btn btn-outline" 
+                onClick={handleCloseModal}
+                style={{ flex: 1 }}
+              >
+                Cancel
+              </button>
+            </div>
+
+            <div style={{ borderTop: '1px solid #e0e0e0', paddingTop: '1rem' }}>
+              <p style={{ color: '#dc2626', fontSize: '0.875rem', marginBottom: '0.75rem', fontWeight: '500' }}>
+                ⚠️ Danger Zone
+              </p>
+              <button 
+                className="btn btn-outline" 
+                onClick={() => handleDeleteUser(selectedUser.id)}
+                style={{ 
+                  width: '100%',
+                  borderColor: '#dc2626',
+                  color: '#dc2626'
+                }}
+              >
+                Delete User
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </>

@@ -1,5 +1,6 @@
 package com.skillforge.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,6 +23,7 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
 
@@ -38,12 +40,15 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private Set<Enrollment> enrollments = new HashSet<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL)
     private Set<Course> courses = new HashSet<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL)
     private Set<Batch> batches = new HashSet<>();
 

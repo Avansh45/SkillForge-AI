@@ -1,37 +1,3 @@
-// Change password
-export const changePassword = async (email, oldPassword, newPassword) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/auth/change-password?email=${encodeURIComponent(email)}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ oldPassword, newPassword }),
-    });
-    const data = await response.json();
-    if (!response.ok || !data.token) {
-      return {
-        success: false,
-        error: data.message || 'Password change failed',
-      };
-    }
-    // Save new session
-    saveUserSession(data.token, data.role, data.name, data.email);
-    return {
-      success: true,
-      user: {
-        role: data.role,
-        name: data.name,
-        email: data.email,
-      },
-    };
-  } catch (error) {
-    return {
-      success: false,
-      error: 'Network error. Please try again.',
-    };
-  }
-};
 // src/utils/auth.js
 
 const API_BASE_URL = 'http://localhost:8080/api';
@@ -106,26 +72,16 @@ export const registerUser = async (role, name, email, password) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        name,
-        email,
-        password,
-        role,
-      }),
+      body: JSON.stringify({ name, email, password, role }),
     });
-
     const data = await response.json();
-
     if (!response.ok || !data.token) {
       return {
         success: false,
         error: data.message || 'Registration failed',
       };
     }
-
-    // Save session
     saveUserSession(data.token, data.role, data.name, data.email);
-
     return {
       success: true,
       user: {
@@ -143,32 +99,58 @@ export const registerUser = async (role, name, email, password) => {
 };
 
 // Login user
-export const loginUser = async (role, email, password) => {
+export const loginUser = async (email, password, role) => {
   try {
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        email,
-        password,
-        role,
-      }),
+      body: JSON.stringify({ email, password, role }),
     });
-
     const data = await response.json();
-
     if (!response.ok || !data.token) {
       return {
         success: false,
         error: data.message || 'Login failed',
       };
     }
-
-    // Save session
     saveUserSession(data.token, data.role, data.name, data.email);
+    return {
+      success: true,
+      user: {
+        role: data.role,
+        name: data.name,
+        email: data.email,
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: 'Network error. Please try again.',
+    };
+  }
+};
 
+// Change password
+export const changePassword = async (email, oldPassword, newPassword) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/change-password?email=${encodeURIComponent(email)}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ oldPassword, newPassword }),
+    });
+    const data = await response.json();
+    if (!response.ok || !data.token) {
+      return {
+        success: false,
+        error: data.message || 'Password change failed',
+      };
+    }
+    // Save new session
+    saveUserSession(data.token, data.role, data.name, data.email);
     return {
       success: true,
       user: {
