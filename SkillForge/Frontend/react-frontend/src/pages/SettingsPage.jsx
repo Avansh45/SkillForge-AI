@@ -6,9 +6,7 @@ import { useNavigate, Navigate } from "react-router-dom";
 const SettingsPage = () => {
   const user = getUserSession();
   const navigate = useNavigate();
-  React.useEffect(() => {
-    console.log('SettingsPage debug:', { user, role: user?.role });
-  }, [user]);
+  
   const handleLogout = () => {
     logout();
     navigate("/");

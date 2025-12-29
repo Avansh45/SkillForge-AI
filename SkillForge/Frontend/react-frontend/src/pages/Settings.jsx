@@ -198,40 +198,22 @@ const Settings = ({ user, role, handleLogout, onBackToDashboard }) => {
             <div className="card">
               <h3>Exam Defaults</h3>
               <p className="card-sub">Standard settings applied to new exams.</p>
-              <ul className="list">
-                <li>
-                  <span>Negative marking</span>
-                  <span className="label">-0.25 for wrong answers</span>
-                </li>
-                <li>
-                  <span>Question shuffle</span>
-                  <span className="label">Enabled for all exams</span>
-                </li>
-                <li>
-                  <span>Result visibility</span>
-                  <span className="label">Instant with solution view</span>
-                </li>
-              </ul>
+              <div style={{ padding: '3rem', textAlign: 'center', color: '#666', background: '#f8f9fa', borderRadius: '8px' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>⚙️</div>
+                <p style={{ margin: 0, fontWeight: '500' }}>No defaults configured</p>
+                <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem' }}>Exam settings will be configured here.</p>
+              </div>
             </div>
           </div>
           <div>
             <div className="card">
               <h3>Communication & Notifications</h3>
               <p className="card-sub">How students receive updates.</p>
-              <ul className="list">
-                <li>
-                  <span>Exam alerts</span>
-                  <span className="label">Email + in-app notification</span>
-                </li>
-                <li>
-                  <span>Reminder schedule</span>
-                  <span className="label">24 hrs & 2 hrs before exam</span>
-                </li>
-                <li>
-                  <span>Feedback forms</span>
-                  <span className="label">After every major exam</span>
-                </li>
-              </ul>
+              <div style={{ padding: '3rem', textAlign: 'center', color: '#666', background: '#f8f9fa', borderRadius: '8px' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🔔</div>
+                <p style={{ margin: 0, fontWeight: '500' }}>No notifications configured</p>
+                <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem' }}>Set up notification preferences here.</p>
+              </div>
             </div>
           </div>
         </div>

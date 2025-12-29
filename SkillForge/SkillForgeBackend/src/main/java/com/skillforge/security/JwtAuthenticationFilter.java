@@ -36,8 +36,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 email = jwtUtil.getEmailFromToken(jwt);
                 role = jwtUtil.getRoleFromToken(jwt);
+                System.out.println("=== JWT DEBUG ===");
+                System.out.println("Request URI: " + request.getRequestURI());
+                System.out.println("Email from token: " + email);
+                System.out.println("Role from token: " + role);
+                System.out.println("Authority being set: ROLE_" + role);
+                System.out.println("================");
             } catch (Exception e) {
-                // Invalid token
+                System.out.println("=== JWT ERROR ===");
+                System.out.println("Error parsing token: " + e.getMessage());
+                System.out.println("================");
             }
         }
 
@@ -47,6 +55,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         email, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role)));
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+                System.out.println("=== AUTH SUCCESS ===");
+                System.out.println("Authentication set for: " + email);
+                System.out.println("Authorities: " + authToken.getAuthorities());
+                System.out.println("===================");
             }
         }
         chain.doFilter(request, response);

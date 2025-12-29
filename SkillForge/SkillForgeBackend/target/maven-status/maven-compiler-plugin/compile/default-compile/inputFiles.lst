@@ -1,3 +1,4 @@
+C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\controller\ExamSubmissionController.java
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\repository\BatchRepository.java
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\controller\CourseController.java
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\entity\Enrollment.java
@@ -5,7 +6,10 @@ C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\controller\VideoController.java
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\repository\UserRepository.java
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\controller\PerformanceController.java
+C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\entity\ExamAnswer.java
+C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\repository\QuestionRepository.java
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\repository\ExamRepository.java
+C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\controller\QuestionController.java
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\repository\VideoRepository.java
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\dto\AuthResponse.java
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\controller\StudentController.java
@@ -23,6 +27,7 @@ C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\dto\RegisterRequest.java
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\repository\ExamAttemptRepository.java
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\controller\InstructorController.java
+C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\entity\Question.java
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\controller\AuthController.java
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\dto\AuthRequest.java
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\entity\User.java
@@ -31,8 +36,10 @@ C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\security\JwtUtil.java
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\dto\ChangePasswordRequest.java
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\dto\CourseRequest.java
+C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\service\ExamService.java
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\service\VideoService.java
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\entity\Course.java
+C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\repository\ExamAnswerRepository.java
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\entity\Exam.java
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\entity\ExamAttempt.java
 C:\Users\hp\OneDrive\Documents\GitHub\SkillForge-AI\SkillForge\SkillForgeBackend\src\main\java\com\skillforge\service\AuthService.java

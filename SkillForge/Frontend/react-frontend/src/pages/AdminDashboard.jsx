@@ -4,7 +4,16 @@ import { getUserSession, logout } from '../utils/auth';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Settings from './Settings';
-import { getPlatformOverview, getAllUsers, updateUserRole, deleteUser } from '../api/adminService';
+import { 
+  getPlatformOverview, 
+  getAllUsers, 
+  updateUserRole, 
+  deleteUser,
+  getPlatformStatistics,
+  getExamAnalytics,
+  getRecentActivity,
+  getCoursePerformance 
+} from '../api/adminService';
 import { useCourses } from '../hooks';
 
 const AdminDashboard = () => {
@@ -14,8 +23,15 @@ const AdminDashboard = () => {
   const headerRef = useRef(null);
   
   const [overview, setOverview] = useState(null);
+  const [statistics, setStatistics] = useState(null);
+  const [examAnalytics, setExamAnalytics] = useState(null);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [coursePerformance, setCoursePerformance] = useState([]);
   const [users, setUsers] = useState([]);
+  
   const [loadingOverview, setLoadingOverview] = useState(true);
+  const [loadingStatistics, setLoadingStatistics] = useState(true);
+  const [loadingActivity, setLoadingActivity] = useState(true);
   const [loadingUsers, setLoadingUsers] = useState(true);
   
 
@@ -36,25 +52,29 @@ const AdminDashboard = () => {
   const fetchData = async () => {
     try {
       setLoadingOverview(true);
+      setLoadingStatistics(true);
+      setLoadingActivity(true);
       setLoadingUsers(true);
       
-      console.log('Fetching admin data...');
-      const [overviewData, usersData] = await Promise.all([
+      const [overviewData, statsData, activityData, usersData, performanceData] = await Promise.all([
         getPlatformOverview(),
-        getAllUsers()
+        getPlatformStatistics(),
+        getRecentActivity(),
+        getAllUsers(),
+        getCoursePerformance()
       ]);
       
-      console.log('Overview data:', overviewData);
-      console.log('Users data:', usersData);
-      
       setOverview(overviewData);
+      setStatistics(statsData);
+      setRecentActivity(activityData || []);
       setUsers(usersData || []);
+      setCoursePerformance(performanceData || []);
     } catch (error) {
-      console.error('Error fetching admin data:', error);
-      console.error('Error details:', error.response || error.message);
       alert(`❌ Failed to load dashboard data: ${error.response?.data?.error || error.message}`);
     } finally {
       setLoadingOverview(false);
+      setLoadingStatistics(false);
+      setLoadingActivity(false);
       setLoadingUsers(false);
     }
   };
@@ -182,7 +202,7 @@ const AdminDashboard = () => {
                   <div className="card">
                     <h2>Platform Summary</h2>
                     <p className="card-sub">Key numbers across your organisation.</p>
-                    {loadingOverview ? (
+                    {loadingStatistics ? (
                       <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
                         <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>⏳</div>
                         Loading statistics...
@@ -190,15 +210,15 @@ const AdminDashboard = () => {
                     ) : (
                       <div className="stat-row">
                         <div className="stat-pill">
-                          <strong>{overview?.totalUsers || 0}</strong>
+                          <strong>{statistics?.totalUsers || 0}</strong>
                           Total users
                         </div>
                         <div className="stat-pill">
-                          <strong>--</strong>
-                          Active batches
+                          <strong>{statistics?.totalCourses || 0}</strong>
+                          Active courses
                         </div>
                         <div className="stat-pill">
-                          <strong>--</strong>
+                          <strong>{statistics?.examsThisMonth || 0}</strong>
                           Exams conducted this month
                         </div>
                       </div>
@@ -236,20 +256,203 @@ const AdminDashboard = () => {
                   <div className="card">
                     <h3>Activity Highlights</h3>
                     <p className="card-sub">Recent activity on the platform.</p>
-                    <ul className="list">
-                      <li>
-                        <span>Average daily logins</span>
-                        <span className="label">150</span>
-                      </li>
-                      <li>
-                        <span>Peak usage time</span>
-                        <span className="label">7 PM – 10 PM</span>
-                      </li>
-                      <li>
-                        <span>Question bank size</span>
-                        <span className="label">3,200 questions</span>
-                      </li>
-                    </ul>
+                    {loadingActivity ? (
+                      <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                        <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>⏳</div>
+                        Loading activity...
+                      </div>
+                    ) : recentActivity.length === 0 ? (
+                      <div style={{ padding: '3rem', textAlign: 'center', color: '#666', background: '#f8f9fa', borderRadius: '8px' }}>
+                        <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📈</div>
+                        <p style={{ margin: 0, fontWeight: '500' }}>No activity data yet</p>
+                        <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem' }}>Activity metrics will appear as users engage with the platform.</p>
+                      </div>
+                    ) : (
+                      <ul className="list" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                        {recentActivity.slice(0, 10).map((activity, index) => (
+                          <li key={index} style={{ alignItems: 'flex-start' }}>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                                <span style={{ 
+                                  fontSize: '1.25rem',
+                                  lineHeight: 1
+                                }}>
+                                  {activity.type === 'EXAM_ATTEMPT' ? '📝' : '📚'}
+                                </span>
+                                <strong style={{ fontSize: '0.9rem' }}>
+                                  {activity.studentName}
+                                </strong>
+                              </div>
+                              <div style={{ fontSize: '0.875rem', color: '#666', marginLeft: '1.75rem' }}>
+                                {activity.type === 'EXAM_ATTEMPT' ? (
+                                  <>
+                                    Completed <strong>{activity.examTitle}</strong>
+                                    <span style={{ 
+                                      marginLeft: '0.5rem',
+                                      color: activity.status === 'PASSED' ? '#16a34a' : '#dc2626',
+                                      fontWeight: '600'
+                                    }}>
+                                      {activity.score?.toFixed(1)}%
+                                    </span>
+                                  </>
+                                ) : (
+                                  <>Enrolled in <strong>{activity.courseTitle}</strong></>
+                                )}
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: '#999', marginLeft: '1.75rem', marginTop: '0.25rem' }}>
+                                {new Date(activity.timestamp).toLocaleString()}
+                              </div>
+                            </div>
+                            <span style={{ 
+                              padding: '0.25rem 0.75rem',
+                              borderRadius: '12px',
+                              fontSize: '0.75rem',
+                              fontWeight: '600',
+                              background: activity.type === 'EXAM_ATTEMPT' 
+                                ? (activity.status === 'PASSED' ? '#dcfce7' : '#fee2e2')
+                                : '#dbeafe',
+                              color: activity.type === 'EXAM_ATTEMPT'
+                                ? (activity.status === 'PASSED' ? '#166534' : '#991b1b')
+                                : '#1e40af'
+                            }}>
+                              {activity.status}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Exam Analytics Section - NEW */}
+            <div className="section-block" data-section="analytics">
+              <h2 className="section-block-title">Exam Analytics</h2>
+              <p className="section-block-sub">
+                Performance metrics and statistics across all exams.
+              </p>
+
+              <div className="grid">
+                <div>
+                  <div className="card">
+                    <h3>Overall Exam Statistics</h3>
+                    <p className="card-sub">Key exam metrics across the platform.</p>
+                    {loadingStatistics ? (
+                      <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                        <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>⏳</div>
+                        Loading statistics...
+                      </div>
+                    ) : (
+                      <div className="stat-row">
+                        <div className="stat-pill">
+                          <strong>{statistics?.totalExams || 0}</strong>
+                          Total Exams
+                        </div>
+                        <div className="stat-pill">
+                          <strong>{statistics?.totalExamAttempts || 0}</strong>
+                          Total Attempts
+                        </div>
+                        <div className="stat-pill">
+                          <strong>{statistics?.averageExamScore?.toFixed(1) || 0}%</strong>
+                          Avg. Score
+                        </div>
+                        <div className="stat-pill">
+                          <strong>{statistics?.totalQuestions || 0}</strong>
+                          Total Questions
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="card">
+                    <h3>Course Performance</h3>
+                    <p className="card-sub">Enrollment and performance by course.</p>
+                    {loadingStatistics ? (
+                      <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                        <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>⏳</div>
+                        Loading performance data...
+                      </div>
+                    ) : coursePerformance.length === 0 ? (
+                      <div style={{ padding: '3rem', textAlign: 'center', color: '#666', background: '#f8f9fa', borderRadius: '8px' }}>
+                        <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📊</div>
+                        <p style={{ margin: 0, fontWeight: '500' }}>No course data yet</p>
+                        <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem' }}>Course performance will appear when courses are created.</p>
+                      </div>
+                    ) : (
+                      <ul className="list" style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                        {coursePerformance.map((course) => (
+                          <li key={course.courseId} style={{ alignItems: 'flex-start' }}>
+                            <div style={{ flex: 1 }}>
+                              <strong>{course.courseTitle}</strong>
+                              <div style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.25rem' }}>
+                                Instructor: {course.instructorName}
+                              </div>
+                              <div style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.25rem' }}>
+                                {course.totalEnrollments} enrollments · {course.totalExams} exams
+                              </div>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                              <div style={{ 
+                                fontSize: '1.25rem', 
+                                fontWeight: 'bold',
+                                color: course.averageScore >= 70 ? '#16a34a' : course.averageScore >= 50 ? '#f59e0b' : '#dc2626'
+                              }}>
+                                {course.averageScore?.toFixed(1)}%
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: '#666' }}>Avg. Score</div>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="card">
+                    <h3>Platform Insights</h3>
+                    <p className="card-sub">Quick overview of platform metrics.</p>
+                    {loadingStatistics ? (
+                      <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                        <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>⏳</div>
+                        Loading insights...
+                      </div>
+                    ) : (
+                      <ul className="list">
+                        <li>
+                          <div>
+                            <strong>Total Enrollments</strong>
+                            <div style={{ fontSize: '0.875rem', color: '#666' }}>Students enrolled in courses</div>
+                          </div>
+                          <span className="label" style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>
+                            {statistics?.totalEnrollments || 0}
+                          </span>
+                        </li>
+                        <li>
+                          <div>
+                            <strong>Exams This Month</strong>
+                            <div style={{ fontSize: '0.875rem', color: '#666' }}>Exams attempted in current month</div>
+                          </div>
+                          <span className="label" style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#16a34a' }}>
+                            {statistics?.examsThisMonth || 0}
+                          </span>
+                        </li>
+                        <li>
+                          <div>
+                            <strong>Average Score</strong>
+                            <div style={{ fontSize: '0.875rem', color: '#666' }}>Platform-wide exam average</div>
+                          </div>
+                          <span className="label" style={{ 
+                            fontSize: '1.25rem', 
+                            fontWeight: 'bold',
+                            color: (statistics?.averageExamScore || 0) >= 70 ? '#16a34a' : '#f59e0b'
+                          }}>
+                            {statistics?.averageExamScore?.toFixed(1) || 0}%
+                          </span>
+                        </li>
+                      </ul>
+                    )}
                   </div>
                 </div>
               </div>
@@ -358,20 +561,11 @@ const AdminDashboard = () => {
                   <div className="card">
                     <h3>Exam Summary</h3>
                     <p className="card-sub">This month's assessment statistics.</p>
-                    <ul className="list">
-                      <li>
-                        <span>Total exams conducted</span>
-                        <span className="label">96</span>
-                      </li>
-                      <li>
-                        <span>Average completion rate</span>
-                        <span className="label">84%</span>
-                      </li>
-                      <li>
-                        <span>Average score across exams</span>
-                        <span className="label">69%</span>
-                      </li>
-                    </ul>
+                    <div style={{ padding: '3rem', textAlign: 'center', color: '#666', background: '#f8f9fa', borderRadius: '8px' }}>
+                      <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📝</div>
+                      <p style={{ margin: 0, fontWeight: '500' }}>No exam data available</p>
+                      <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem' }}>Exam statistics will appear when assessments are conducted.</p>
+                    </div>
                   </div>
                 </div>
 
@@ -379,20 +573,11 @@ const AdminDashboard = () => {
                   <div className="card">
                     <h3>Policy Overview</h3>
                     <p className="card-sub">Common exam policy patterns.</p>
-                    <ul className="list">
-                      <li>
-                        <span>Use of negative marking</span>
-                        <span className="label">Enabled in 72% of exams</span>
-                      </li>
-                      <li>
-                        <span>Remote proctoring enabled</span>
-                        <span className="label">For high-stakes tests</span>
-                      </li>
-                      <li>
-                        <span>Result release mode</span>
-                        <span className="label">Instant for 60% of exams</span>
-                      </li>
-                    </ul>
+                    <div style={{ padding: '3rem', textAlign: 'center', color: '#666', background: '#f8f9fa', borderRadius: '8px' }}>
+                      <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>⚙️</div>
+                      <p style={{ margin: 0, fontWeight: '500' }}>No policies configured</p>
+                      <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem' }}>Configure exam policies in settings.</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -486,20 +671,11 @@ const AdminDashboard = () => {
                   <div className="card">
                     <h3>Engagement Trends</h3>
                     <p className="card-sub">Recent patterns in how users interact with the platform.</p>
-                    <ul className="list">
-                      <li>
-                        <span>Active users this week</span>
-                        <span className="label">312</span>
-                      </li>
-                      <li>
-                        <span>Avg sessions per user</span>
-                        <span className="label">3.1 per day</span>
-                      </li>
-                      <li>
-                        <span>Top course by activity</span>
-                        <span className="label">Java + DSA Foundations</span>
-                      </li>
-                    </ul>
+                    <div style={{ padding: '3rem', textAlign: 'center', color: '#666', background: '#f8f9fa', borderRadius: '8px' }}>
+                      <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📊</div>
+                      <p style={{ margin: 0, fontWeight: '500' }}>No engagement data yet</p>
+                      <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem' }}>Analytics will appear as users engage with the platform.</p>
+                    </div>
                   </div>
                 </div>
 
@@ -507,20 +683,11 @@ const AdminDashboard = () => {
                   <div className="card">
                     <h3>Learning Preferences</h3>
                     <p className="card-sub">How the system schedules and recommends practice.</p>
-                    <ul className="list">
-                      <li>
-                        <span>Daily practice time</span>
-                        <span className="label">20–40 mins</span>
-                      </li>
-                      <li>
-                        <span>Difficulty mode</span>
-                        <span className="label">Adaptive · Medium → Hard</span>
-                      </li>
-                      <li>
-                        <span>Reminder window</span>
-                        <span className="label">Evening · 7 PM – 10 PM</span>
-                      </li>
-                    </ul>
+                    <div style={{ padding: '3rem', textAlign: 'center', color: '#666', background: '#f8f9fa', borderRadius: '8px' }}>
+                      <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>⚙️</div>
+                      <p style={{ margin: 0, fontWeight: '500' }}>No preferences data</p>
+                      <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem' }}>User preferences will be analyzed over time.</p>
+                    </div>
                   </div>
                 </div>
 
@@ -528,20 +695,11 @@ const AdminDashboard = () => {
                   <div className="card">
                     <h3>Risk Indicators</h3>
                     <p className="card-sub">Signals where intervention may be needed.</p>
-                    <ul className="list">
-                      <li>
-                        <span>Batches with low attendance</span>
-                        <span className="label">3 batches below 60%</span>
-                      </li>
-                      <li>
-                        <span>Students with no activity</span>
-                        <span className="label">Last 14 days · 22 students</span>
-                      </li>
-                      <li>
-                        <span>Courses with poor outcomes</span>
-                        <span className="label">2 courses &lt; 60% avg score</span>
-                      </li>
-                    </ul>
+                    <div style={{ padding: '3rem', textAlign: 'center', color: '#666', background: '#f8f9fa', borderRadius: '8px' }}>
+                      <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>⚠️</div>
+                      <p style={{ margin: 0, fontWeight: '500' }}>No risk indicators</p>
+                      <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem' }}>Risk analysis will appear after sufficient activity.</p>
+                    </div>
                   </div>
                 </div>
               </div>

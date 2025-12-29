@@ -4,6 +4,7 @@ import { getUserSession, logout } from '../utils/auth';
 import { useCourses, useStudentCourses } from '../hooks';
 import { enrollInCourse, unenrollFromCourse } from '../api/studentService';
 import { getCourseVideos } from '../api/videoService';
+import { getStudentExams } from '../api/examService';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Settings from './Settings';
@@ -15,10 +16,11 @@ const StudentDashboard = () => {
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [courseVideos, setCourseVideos] = useState([]);
   const [loadingVideos, setLoadingVideos] = useState(false);
+  const [exams, setExams] = useState([]);
+  const [loadingExams, setLoadingExams] = useState(false);
   const navigate = useNavigate();
   const headerRef = useRef(null);
 
-  // Use custom hooks for data fetching
   const { courses: allCourses, loading: loadingCourses } = useCourses();
   const { enrolledCourses, loading: loadingEnrollments, refetch: refetchEnrollments } = useStudentCourses();
 
@@ -28,6 +30,23 @@ const StudentDashboard = () => {
       setUser(currentUser);
     }
   }, []);
+
+  useEffect(() => {
+    fetchExams();
+  }, []);
+
+  const fetchExams = async () => {
+    setLoadingExams(true);
+    try {
+      const examData = await getStudentExams();
+      setExams(Array.isArray(examData) ? examData : []);
+    } catch (err) {
+      console.error('Failed to fetch exams:', err);
+      setExams([]);
+    } finally {
+      setLoadingExams(false);
+    }
+  };
 
   const handleEnroll = async (courseId) => {
     setEnrolling(courseId);
@@ -82,7 +101,6 @@ const StudentDashboard = () => {
     if (!url) return null;
     
     if (videoType === 'YOUTUBE') {
-      // Convert YouTube watch URL to embed URL
       const videoId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/)?.[1];
       return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
     }
@@ -346,54 +364,149 @@ const StudentDashboard = () => {
 
             {/* Exams Section */}
             <div className="section-block" data-section="exams">
-              <h2 className="section-block-title">Upcoming & Recent Exams</h2>
+              <h2 className="section-block-title">My Exams</h2>
               <p className="section-block-sub">
                 View upcoming exams and quickly revise recent attempts.
               </p>
 
-              <div className="grid">
-                <div>
-                  <div className="card">
-                    <h3>Upcoming Exams</h3>
-                    <p className="card-sub">Make sure you're prepared.</p>
-                    <ul className="list">
-                      <li>
-                        <span>Java OOPs & Collections</span>
-                        <span className="label">Tomorrow · 30 MCQs · 45 mins</span>
-                      </li>
-                      <li>
-                        <span>Quant: Number Systems</span>
-                        <span className="label">In 3 days · 25 Qs · 40 mins</span>
-                      </li>
-                      <li>
-                        <span>Verbal: Reading Comprehension</span>
-                        <span className="label">In 5 days · 3 passages</span>
-                      </li>
-                    </ul>
-                  </div>
+              {loadingExams ? (
+                <div className="card" style={{ padding: '3rem', textAlign: 'center', color: '#666' }}>
+                  <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>⏳</div>
+                  Loading exams...
                 </div>
+              ) : exams.length === 0 ? (
+                <div className="card" style={{ padding: '3rem', textAlign: 'center', color: '#666' }}>
+                  <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📝</div>
+                  <p style={{ margin: 0, fontWeight: '500', fontSize: '1.125rem' }}>No Exams Available</p>
+                  <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem' }}>Enroll in courses to see available exams.</p>
+                </div>
+              ) : (
+                <div className="grid">
+                  {/* Available Exams - Can be attempted now */}
+                  <div>
+                    <div className="card">
+                      <h3>Available Exams</h3>
+                      <p className="card-sub">Ready to take now.</p>
+                      {(() => {
+                        const availableExams = exams.filter(exam => {
+                          return exam.attemptCount < exam.maxAttempts;
+                        });
 
-                <div>
-                  <div className="card">
-                    <h3>Recent Attempts</h3>
-                    <p className="card-sub">Quick analytics from last few exams.</p>
-                    <ul className="list">
-                      <li>
-                        <span>Java Basics Mock</span>
-                        <span className="label">Score: 74% · Time: 38 mins</span>
-                      </li>
-                      <li>
-                        <span>Quant Mixed Set</span>
-                        <span className="label">Score: 68% · Retake suggested</span>
-                      </li>
-                      <li>
-                        <span>Verbal RC Set #2</span>
-                        <span className="label">Score: 82% · Good improvement</span>
-                      </li>
-                    </ul>
+                        if (availableExams.length === 0) {
+                          return (
+                            <div style={{ padding: '3rem', textAlign: 'center', color: '#666', background: '#f8f9fa', borderRadius: '8px' }}>
+                              <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>✅</div>
+                              <p style={{ margin: 0, fontWeight: '500' }}>All exams attempted</p>
+                              <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem' }}>Check back later for new assessments.</p>
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <ul className="list">
+                            {availableExams.map(exam => {
+                              return (
+                                <li key={exam.id} style={{ alignItems: 'flex-start' }}>
+                                  <div style={{ flex: 1 }}>
+                                    <strong>{exam.title}</strong>
+                                    <div style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.25rem' }}>
+                                      {exam.course?.title}
+                                    </div>
+                                    <div style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.25rem' }}>
+                                      {exam.durationMinutes ? `${exam.durationMinutes} mins` : 'Duration not set'}
+                                      {exam.totalQuestions && ` · ${exam.totalQuestions} questions`}
+                                    </div>
+                                    <div style={{ fontSize: '0.75rem', color: '#16a34a', marginTop: '0.25rem' }}>
+                                      {exam.attemptCount} of {exam.maxAttempts} attempts used
+                                    </div>
+                                  </div>
+                                  <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'flex-end' }}>
+                                    <button
+                                      className="btn btn-primary"
+                                      style={{ padding: '0.5rem 1.25rem', fontSize: '0.875rem' }}
+                                      onClick={() => navigate(`/exam/${exam.id}`)}
+                                    >
+                                      {exam.attemptCount > 0 ? 'Retake Exam' : 'Take Exam'}
+                                    </button>
+                                  </div>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        );
+                      })()}
+                    </div>
+                  </div>
+
+                  {/* Completed Exams */}
+                  <div>
+                    <div className="card">
+                      <h3>Completed Exams</h3>
+                      <p className="card-sub">Review your results.</p>
+                      {(() => {
+                        const completedExams = exams.filter(exam => {
+                          return exam.hasAttempted;
+                        });
+
+                        if (completedExams.length === 0) {
+                          return (
+                            <div style={{ padding: '3rem', textAlign: 'center', color: '#666', background: '#f8f9fa', borderRadius: '8px' }}>
+                              <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📊</div>
+                              <p style={{ margin: 0, fontWeight: '500' }}>No completed exams</p>
+                              <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem' }}>Your exam history will appear here.</p>
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <ul className="list">
+                            {completedExams.map(exam => {
+                              const canRetake = exam.attemptCount < exam.maxAttempts;
+                              
+                              return (
+                                <li key={exam.id} style={{ alignItems: 'flex-start' }}>
+                                  <div style={{ flex: 1 }}>
+                                    <strong>{exam.title}</strong>
+                                    <div style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.25rem' }}>
+                                      {exam.course?.title}
+                                    </div>
+                                    <div style={{ fontSize: '0.875rem', marginTop: '0.25rem' }}>
+                                      <span style={{ 
+                                        color: exam.latestScore >= 70 ? '#16a34a' : exam.latestScore >= 50 ? '#f59e0b' : '#dc2626',
+                                        fontWeight: '600'
+                                      }}>
+                                        {exam.latestScore ? `${exam.latestScore.toFixed(1)}%` : 'N/A'}
+                                      </span>
+                                      <span style={{ color: '#666', marginLeft: '0.5rem' }}>
+                                        ({exam.attemptCount} attempt{exam.attemptCount !== 1 ? 's' : ''})
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div style={{ textAlign: 'right' }}>
+                                    {canRetake ? (
+                                      <button
+                                        className="btn btn-outline"
+                                        style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+                                        onClick={() => navigate(`/exam/${exam.id}`)}
+                                      >
+                                        Retake
+                                      </button>
+                                    ) : (
+                                      <span style={{ fontSize: '0.75rem', color: '#dc2626', fontWeight: '500' }}>
+                                        Max attempts reached
+                                      </span>
+                                    )}
+                                  </div>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        );
+                      })()}
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Analytics Section */}
@@ -408,20 +521,11 @@ const StudentDashboard = () => {
                   <div className="card">
                     <h3>Skill-wise Performance</h3>
                     <p className="card-sub">Performance breakdown across key skill areas.</p>
-                    <ul className="list">
-                      <li>
-                        <span>Problem solving (DSA)</span>
-                        <span className="label">Strong · Accuracy 82%</span>
-                      </li>
-                      <li>
-                        <span>Quantitative aptitude</span>
-                        <span className="label">Moderate · Accuracy 64%</span>
-                      </li>
-                      <li>
-                        <span>Verbal & communication</span>
-                        <span className="label">Improving · Accuracy 72%</span>
-                      </li>
-                    </ul>
+                    <div style={{ padding: '3rem', textAlign: 'center', color: '#666', background: '#f8f9fa', borderRadius: '8px' }}>
+                      <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📊</div>
+                      <p style={{ margin: 0, fontWeight: '500' }}>No performance data yet</p>
+                      <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem' }}>Complete exams to see your skill analysis.</p>
+                    </div>
                   </div>
                 </div>
 
@@ -429,20 +533,11 @@ const StudentDashboard = () => {
                   <div className="card">
                     <h3>Learning Preferences</h3>
                     <p className="card-sub">How the system schedules and recommends practice.</p>
-                    <ul className="list">
-                      <li>
-                        <span>Daily practice time</span>
-                        <span className="label">20–40 mins</span>
-                      </li>
-                      <li>
-                        <span>Difficulty mode</span>
-                        <span className="label">Adaptive · Medium → Hard</span>
-                      </li>
-                      <li>
-                        <span>Reminder window</span>
-                        <span className="label">Evening · 7 PM – 10 PM</span>
-                      </li>
-                    </ul>
+                    <div style={{ padding: '3rem', textAlign: 'center', color: '#666', background: '#f8f9fa', borderRadius: '8px' }}>
+                      <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>⚙️</div>
+                      <p style={{ margin: 0, fontWeight: '500' }}>No preferences set</p>
+                      <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem' }}>Configure your learning preferences in settings.</p>
+                    </div>
                   </div>
                 </div>
 
@@ -450,20 +545,11 @@ const StudentDashboard = () => {
                   <div className="card">
                     <h3>Recommendations</h3>
                     <p className="card-sub">Next actions generated from your recent history.</p>
-                    <ul className="list">
-                      <li>
-                        <span>Revise Java Collections & Streams</span>
-                        <span className="label">3 low-scoring attempts</span>
-                      </li>
-                      <li>
-                        <span>Practice 10 Quant questions daily</span>
-                        <span className="label">To reach 75%+ accuracy</span>
-                      </li>
-                      <li>
-                        <span>Attempt one RC set every 2 days</span>
-                        <span className="label">To stabilise reading speed</span>
-                      </li>
-                    </ul>
+                    <div style={{ padding: '3rem', textAlign: 'center', color: '#666', background: '#f8f9fa', borderRadius: '8px' }}>
+                      <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>💡</div>
+                      <p style={{ margin: 0, fontWeight: '500' }}>No recommendations yet</p>
+                      <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem' }}>AI recommendations will appear after completing exams.</p>
+                    </div>
                   </div>
                 </div>
               </div>

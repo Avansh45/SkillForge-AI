@@ -5,6 +5,7 @@ import StudentDashboard from './pages/StudentDashboard';
 import InstructorDashboard from './pages/InstructorDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import SettingsPage from './pages/SettingsPage';
+import ExamPage from './pages/ExamPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
         <Route
@@ -37,6 +38,15 @@ function App() {
           element={
             <ProtectedRoute requiredRole="Student">
               <StudentDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/exam/:examId"
+          element={
+            <ProtectedRoute requiredRole="Student">
+              <ExamPage />
             </ProtectedRoute>
           }
         />

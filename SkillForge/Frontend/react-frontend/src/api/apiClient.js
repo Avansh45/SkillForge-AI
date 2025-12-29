@@ -14,6 +14,15 @@ apiClient.interceptors.request.use(
     const token = getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (Date.now() >= payload.exp * 1000) {
+          logout();
+          window.location.href = '/login';
+        }
+      } catch (e) {
+      }
     }
     return config;
   },
@@ -48,7 +57,7 @@ apiClient.interceptors.response.use(
         break;
 
       case 403:
-        error.message = 'You do not have permission to perform this action.';
+        error.message = 'You do not have permission to perform this action. Please ensure you are logged in with the correct role.';
         break;
 
       case 404:
@@ -62,12 +71,6 @@ apiClient.interceptors.response.use(
       default:
         error.message = data?.message || error.message || 'Request failed.';
     }
-
-    console.error('API Error:', {
-      status,
-      message: error.message,
-      url: error.config?.url,
-    });
 
     return Promise.reject(error);
   }

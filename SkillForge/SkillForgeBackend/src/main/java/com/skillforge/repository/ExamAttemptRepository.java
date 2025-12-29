@@ -13,5 +13,6 @@ public interface ExamAttemptRepository extends JpaRepository<ExamAttempt, Long> 
     List<ExamAttempt> findByStudent(User student);
     List<ExamAttempt> findByExam(Exam exam);
     List<ExamAttempt> findByStudentOrderByAttemptedAtDesc(User student);
+    List<ExamAttempt> findByStudentAndExam(User student, Exam exam);
 }
 
