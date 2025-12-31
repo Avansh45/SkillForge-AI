@@ -4,7 +4,7 @@ import { getUserSession, logout } from '../utils/auth';
 import { useInstructorCourses } from '../hooks';
 import { createCourse, updateCourse, deleteCourse } from '../api/courseService';
 import { getCourseVideos, addVideoLink, deleteVideo } from '../api/videoService';
-import { getInstructorExams, getExamAttempts } from '../api/examService';
+import { getInstructorExams, getExamAttempts, deleteExam } from '../api/examService';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Settings from './Settings';
@@ -118,6 +118,20 @@ const InstructorDashboard = () => {
       await refetchCourses();
     } catch (err) {
       alert('❌ ' + (err.message || 'Failed to delete course. Please try again.'));
+    }
+  };
+
+  const handleDeleteExam = async (examId) => {
+    if (!confirm('Are you sure you want to delete this exam? This will also delete all questions and student attempts. This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      await deleteExam(examId);
+      await fetchExams();
+      alert('✅ Exam deleted successfully!');
+    } catch (err) {
+      alert('❌ ' + (err.message || 'Failed to delete exam. Please try again.'));
     }
   };
 
@@ -543,6 +557,13 @@ const InstructorDashboard = () => {
                                   onClick={() => handleManageQuestions(exam)}
                                 >
                                   📝 Manage
+                                </button>
+                                <button
+                                  className="btn btn-outline"
+                                  style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem', color: '#dc2626', borderColor: '#dc2626' }}
+                                  onClick={() => handleDeleteExam(exam.id)}
+                                >
+                                  🗑️ Delete
                                 </button>
                               </div>
                             </td>

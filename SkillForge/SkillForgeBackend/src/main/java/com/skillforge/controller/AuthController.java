@@ -2,8 +2,8 @@ package com.skillforge.controller;
 
 import com.skillforge.dto.AuthRequest;
 import com.skillforge.dto.AuthResponse;
-import com.skillforge.dto.RegisterRequest;
 import com.skillforge.dto.ChangePasswordRequest;
+import com.skillforge.dto.RegisterRequest;
 import com.skillforge.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

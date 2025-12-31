@@ -16,6 +16,14 @@ export const deleteUser = async (userId) => {
   return await apiClient.delete(`/admin/users/${userId}`);
 };
 
+export const deleteCourse = async (courseId) => {
+  return await apiClient.delete(`/admin/courses/${courseId}`);
+};
+
+export const deleteExam = async (examId) => {
+  return await apiClient.delete(`/admin/exams/${examId}`);
+};
+
 // NEW: Get detailed platform statistics
 export const getPlatformStatistics = async () => {
   return await apiClient.get('/admin/statistics');
@@ -34,4 +42,12 @@ export const getRecentActivity = async () => {
 // NEW: Get course performance summary
 export const getCoursePerformance = async () => {
   return await apiClient.get('/admin/course-performance');
+};
+
+export const getAllCourses = async () => {
+  return await apiClient.get('/admin/courses');
+};
+
+export const getAllExams = async () => {
+  return await apiClient.get('/admin/exams');
 };

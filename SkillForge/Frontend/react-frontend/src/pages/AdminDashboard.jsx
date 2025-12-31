@@ -12,7 +12,11 @@ import {
   getPlatformStatistics,
   getExamAnalytics,
   getRecentActivity,
-  getCoursePerformance 
+  getCoursePerformance,
+  getAllCourses,
+  getAllExams,
+  deleteCourse,
+  deleteExam
 } from '../api/adminService';
 import { useCourses } from '../hooks';
 
@@ -28,18 +32,19 @@ const AdminDashboard = () => {
   const [recentActivity, setRecentActivity] = useState([]);
   const [coursePerformance, setCoursePerformance] = useState([]);
   const [users, setUsers] = useState([]);
+  const [courses, setCourses] = useState([]);
+  const [exams, setExams] = useState([]);
   
   const [loadingOverview, setLoadingOverview] = useState(true);
   const [loadingStatistics, setLoadingStatistics] = useState(true);
   const [loadingActivity, setLoadingActivity] = useState(true);
   const [loadingUsers, setLoadingUsers] = useState(true);
-  
+  const [loadingCourses, setLoadingCourses] = useState(true);
+  const [loadingExams, setLoadingExams] = useState(true);
 
   const [showUserModal, setShowUserModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [newRole, setNewRole] = useState('');
-
-  const { courses, loading: loadingCourses } = useCourses();
 
   useEffect(() => {
     const currentUser = getUserSession();
@@ -55,13 +60,17 @@ const AdminDashboard = () => {
       setLoadingStatistics(true);
       setLoadingActivity(true);
       setLoadingUsers(true);
+      setLoadingCourses(true);
+      setLoadingExams(true);
       
-      const [overviewData, statsData, activityData, usersData, performanceData] = await Promise.all([
+      const [overviewData, statsData, activityData, usersData, performanceData, coursesData, examsData] = await Promise.all([
         getPlatformOverview(),
         getPlatformStatistics(),
         getRecentActivity(),
         getAllUsers(),
-        getCoursePerformance()
+        getCoursePerformance(),
+        getAllCourses(),
+        getAllExams()
       ]);
       
       setOverview(overviewData);
@@ -69,6 +78,8 @@ const AdminDashboard = () => {
       setRecentActivity(activityData || []);
       setUsers(usersData || []);
       setCoursePerformance(performanceData || []);
+      setCourses(coursesData || []);
+      setExams(examsData || []);
     } catch (error) {
       alert(`❌ Failed to load dashboard data: ${error.response?.data?.error || error.message}`);
     } finally {
@@ -76,6 +87,8 @@ const AdminDashboard = () => {
       setLoadingStatistics(false);
       setLoadingActivity(false);
       setLoadingUsers(false);
+      setLoadingCourses(false);
+      setLoadingExams(false);
     }
   };
 
@@ -121,6 +134,36 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteCourse = async (courseId) => {
+    if (!confirm('Are you sure you want to delete this course? This will also delete all related exams, enrollments, and videos. This action cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      await deleteCourse(courseId);
+      alert('✅ Course deleted successfully!');
+      fetchData();
+    } catch (error) {
+      console.error('Error deleting course:', error);
+      alert('❌ Failed to delete course: ' + (error.response?.data?.error || error.message));
+    }
+  };
+
+  const handleDeleteExam = async (examId) => {
+    if (!confirm('Are you sure you want to delete this exam? This will also delete all questions and student attempts. This action cannot be undone.')) {
+      return;
+    }
+    
+    try {
+      await deleteExam(examId);
+      alert('✅ Exam deleted successfully!');
+      fetchData();
+    } catch (error) {
+      console.error('Error deleting exam:', error);
+      alert('❌ Failed to delete exam: ' + (error.response?.data?.error || error.message));
+    }
+  };
+
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -143,10 +186,10 @@ const AdminDashboard = () => {
 
   const navItems = [
     { key: 'overview', label: 'Overview' },
-    { key: 'users', label: 'Users' },
+    { key: 'analytics', label: 'Analytics' },
     { key: 'courses', label: 'Courses / Batches' },
     { key: 'exams', label: 'Exams' },
-    { key: 'analytics', label: 'Analytics' },
+    { key: 'users', label: 'Users' },
     { key: 'settings', label: 'Settings' },
   ];
 
@@ -458,128 +501,173 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            {/* Courses Section */}
+            {/* Courses Management Section */}
             <div className="section-block" data-section="courses">
-              <h2 className="section-block-title">Courses & Batches Overview</h2>
+              <h2 className="section-block-title">Course Management</h2>
               <p className="section-block-sub">
-                Understand how learning content is distributed across your institute.
+                View and manage all courses on the platform.
               </p>
-
-              <div className="grid">
-                <div>
-                  <div className="card">
-                    <h3>Course Catalog</h3>
-                    <p className="card-sub">Active courses available to students.</p>
-                    {loadingCourses ? (
-                      <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
-                        <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>⏳</div>
-                        Loading courses...
-                      </div>
-                    ) : courses.length === 0 ? (
-                      <div style={{ padding: '2rem', textAlign: 'center', color: '#666', background: '#f8f9fa', borderRadius: '8px' }}>
-                        <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📚</div>
-                        <p style={{ margin: 0 }}>No courses created yet</p>
-                      </div>
-                    ) : (
-                      <ul className="list">
-                        {courses.slice(0, 5).map((course) => (
-                          <li key={course.id}>
-                            <span>{course.title}</span>
-                            <span className="label">
-                              {course.instructor?.name || 'No instructor'}
-                            </span>
-                          </li>
+              
+              <div className="card">
+                {loadingCourses ? (
+                  <div style={{ padding: '3rem', textAlign: 'center', color: '#666' }}>
+                    <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>⏳</div>
+                    Loading courses...
+                  </div>
+                ) : courses && courses.length > 0 ? (
+                  <div style={{ overflowX: 'auto' }}>
+                    <p style={{ padding: '0.5rem 0', color: '#666', fontSize: '0.875rem' }}>
+                      Showing {courses.length} course(s)
+                    </p>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '2px solid #e0e0e0', textAlign: 'left' }}>
+                          <th style={{ padding: '0.75rem' }}>Course Title</th>
+                          <th style={{ padding: '0.75rem' }}>Instructor</th>
+                          <th style={{ padding: '0.75rem' }}>Enrollments</th>
+                          <th style={{ padding: '0.75rem' }}>Exams</th>
+                          <th style={{ padding: '0.75rem' }}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {courses.map((course) => (
+                          <tr key={course.id} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                            <td style={{ padding: '0.75rem' }}>
+                              <strong>{course.title}</strong>
+                              {course.description && (
+                                <div style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.25rem' }}>
+                                  {course.description}
+                                </div>
+                              )}
+                            </td>
+                            <td style={{ padding: '0.75rem' }}>
+                              {course.instructorName}
+                            </td>
+                            <td style={{ padding: '0.75rem' }}>
+                              <span className="pill" style={{
+                                background: course.enrollmentCount > 0 ? '#10b981' : '#e0e0e0',
+                                color: course.enrollmentCount > 0 ? 'white' : '#666',
+                                padding: '0.25rem 0.75rem',
+                                borderRadius: '9999px',
+                                fontSize: '0.875rem',
+                                fontWeight: '500'
+                              }}>
+                                {course.enrollmentCount}
+                              </span>
+                            </td>
+                            <td style={{ padding: '0.75rem' }}>
+                              {course.examCount}
+                            </td>
+                            <td style={{ padding: '0.75rem' }}>
+                              <button 
+                                className="btn btn-outline" 
+                                style={{ padding: '0.375rem 0.75rem', fontSize: '0.875rem', color: '#dc2626', borderColor: '#dc2626' }}
+                                onClick={() => handleDeleteCourse(course.id)}
+                              >
+                                🗑️ Delete
+                              </button>
+                            </td>
+                          </tr>
                         ))}
-                      </ul>
-                    )}
-                    <div style={{ marginTop: '1rem', padding: '0.75rem', background: '#f8f9fa', borderRadius: '8px' }}>
-                      <strong style={{ display: 'block', marginBottom: '0.25rem' }}>
-                        Total Courses: {courses.length}
-                      </strong>
-                      <span style={{ fontSize: '0.875rem', color: '#666' }}>
-                        Showing {Math.min(5, courses.length)} of {courses.length} courses
-                      </span>
-                    </div>
+                      </tbody>
+                    </table>
                   </div>
-                </div>
-
-                <div>
-                  <div className="card">
-                    <h3>Course Instructors</h3>
-                    <p className="card-sub">Instructors and their courses.</p>
-                    {loadingCourses ? (
-                      <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
-                        <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>⏳</div>
-                        Loading data...
-                      </div>
-                    ) : (
-                      <ul className="list">
-                        {courses
-                          .filter(course => course.instructor?.name)
-                          .reduce((acc, course) => {
-                            const instructorName = course.instructor.name;
-                            const existing = acc.find(item => item.name === instructorName);
-                            if (existing) {
-                              existing.count++;
-                            } else {
-                              acc.push({ name: instructorName, count: 1 });
-                            }
-                            return acc;
-                          }, [])
-                          .slice(0, 5)
-                          .map((instructor, idx) => (
-                            <li key={idx}>
-                              <span>{instructor.name}</span>
-                              <span className="label">{instructor.count} course{instructor.count !== 1 ? 's' : ''}</span>
-                            </li>
-                          ))
-                        }
-                        {courses.filter(c => !c.instructor?.name).length > 0 && (
-                          <li>
-                            <span>Unassigned</span>
-                            <span className="label">
-                              {courses.filter(c => !c.instructor?.name).length} course(s)
-                            </span>
-                          </li>
-                        )}
-                      </ul>
-                    )}
+                ) : (
+                  <div style={{ padding: '3rem', textAlign: 'center', color: '#666', background: '#f8f9fa', borderRadius: '8px' }}>
+                    <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📚</div>
+                    <p style={{ margin: 0, fontWeight: '500' }}>No courses found</p>
+                    <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem' }}>Instructors need to create courses.</p>
                   </div>
-                </div>
+                )}
               </div>
             </div>
 
-            {/* Exams Section */}
+            {/* Exams Management Section */}
             <div className="section-block" data-section="exams">
-              <h2 className="section-block-title">Assessment Activity</h2>
+              <h2 className="section-block-title">Exam Management</h2>
               <p className="section-block-sub">
-                Monitor exam volume and completion rates across the platform.
+                View and manage all exams on the platform.
               </p>
-
-              <div className="grid">
-                <div>
-                  <div className="card">
-                    <h3>Exam Summary</h3>
-                    <p className="card-sub">This month's assessment statistics.</p>
-                    <div style={{ padding: '3rem', textAlign: 'center', color: '#666', background: '#f8f9fa', borderRadius: '8px' }}>
-                      <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📝</div>
-                      <p style={{ margin: 0, fontWeight: '500' }}>No exam data available</p>
-                      <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem' }}>Exam statistics will appear when assessments are conducted.</p>
-                    </div>
+              
+              <div className="card">
+                {loadingExams ? (
+                  <div style={{ padding: '3rem', textAlign: 'center', color: '#666' }}>
+                    <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>⏳</div>
+                    Loading exams...
                   </div>
-                </div>
-
-                <div>
-                  <div className="card">
-                    <h3>Policy Overview</h3>
-                    <p className="card-sub">Common exam policy patterns.</p>
-                    <div style={{ padding: '3rem', textAlign: 'center', color: '#666', background: '#f8f9fa', borderRadius: '8px' }}>
-                      <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>⚙️</div>
-                      <p style={{ margin: 0, fontWeight: '500' }}>No policies configured</p>
-                      <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem' }}>Configure exam policies in settings.</p>
-                    </div>
+                ) : exams && exams.length > 0 ? (
+                  <div style={{ overflowX: 'auto' }}>
+                    <p style={{ padding: '0.5rem 0', color: '#666', fontSize: '0.875rem' }}>
+                      Showing {exams.length} exam(s)
+                    </p>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '2px solid #e0e0e0', textAlign: 'left' }}>
+                          <th style={{ padding: '0.75rem' }}>Exam Title</th>
+                          <th style={{ padding: '0.75rem' }}>Course</th>
+                          <th style={{ padding: '0.75rem' }}>Instructor</th>
+                          <th style={{ padding: '0.75rem' }}>Duration</th>
+                          <th style={{ padding: '0.75rem' }}>Questions</th>
+                          <th style={{ padding: '0.75rem' }}>Attempts</th>
+                          <th style={{ padding: '0.75rem' }}>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {exams.map((exam) => (
+                          <tr key={exam.id} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                            <td style={{ padding: '0.75rem' }}>
+                              <strong>{exam.title}</strong>
+                              {exam.description && (
+                                <div style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.25rem' }}>
+                                  {exam.description}
+                                </div>
+                              )}
+                            </td>
+                            <td style={{ padding: '0.75rem' }}>
+                              {exam.courseTitle}
+                            </td>
+                            <td style={{ padding: '0.75rem' }}>
+                              {exam.instructorName}
+                            </td>
+                            <td style={{ padding: '0.75rem' }}>
+                              {exam.durationMinutes ? `${exam.durationMinutes} mins` : 'Not set'}
+                            </td>
+                            <td style={{ padding: '0.75rem' }}>
+                              {exam.totalQuestions || 0}
+                            </td>
+                            <td style={{ padding: '0.75rem' }}>
+                              <span className="pill" style={{
+                                background: exam.attemptsCount > 0 ? '#10b981' : '#e0e0e0',
+                                color: exam.attemptsCount > 0 ? 'white' : '#666',
+                                padding: '0.25rem 0.75rem',
+                                borderRadius: '9999px',
+                                fontSize: '0.875rem',
+                                fontWeight: '500'
+                              }}>
+                                {exam.attemptsCount || 0}
+                              </span>
+                            </td>
+                            <td style={{ padding: '0.75rem' }}>
+                              <button 
+                                className="btn btn-outline" 
+                                style={{ padding: '0.375rem 0.75rem', fontSize: '0.875rem', color: '#dc2626', borderColor: '#dc2626' }}
+                                onClick={() => handleDeleteExam(exam.id)}
+                              >
+                                🗑️ Delete
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                </div>
+                ) : (
+                  <div style={{ padding: '3rem', textAlign: 'center', color: '#666', background: '#f8f9fa', borderRadius: '8px' }}>
+                    <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📝</div>
+                    <p style={{ margin: 0, fontWeight: '500' }}>No exams found</p>
+                    <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem' }}>Instructors need to create exams.</p>
+                  </div>
+                )}
               </div>
             </div>
 

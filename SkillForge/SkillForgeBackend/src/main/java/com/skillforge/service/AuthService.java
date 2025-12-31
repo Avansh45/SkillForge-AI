@@ -2,8 +2,8 @@ package com.skillforge.service;
 
 import com.skillforge.dto.AuthRequest;
 import com.skillforge.dto.AuthResponse;
-import com.skillforge.dto.RegisterRequest;
 import com.skillforge.dto.ChangePasswordRequest;
+import com.skillforge.dto.RegisterRequest;
 import com.skillforge.entity.User;
 import com.skillforge.repository.UserRepository;
 import com.skillforge.security.JwtUtil;

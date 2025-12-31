@@ -79,6 +79,22 @@ public class AdminController {
         return ResponseEntity.ok(Map.of("message", "User deleted successfully"));
     }
 
+    @DeleteMapping("/courses/{courseId}")
+    public ResponseEntity<Map<String, String>> deleteCourse(@PathVariable Long courseId, Authentication authentication) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new RuntimeException("Course not found"));
+        courseRepository.delete(course);
+        return ResponseEntity.ok(Map.of("message", "Course deleted successfully"));
+    }
+
+    @DeleteMapping("/exams/{examId}")
+    public ResponseEntity<Map<String, String>> deleteExam(@PathVariable Long examId, Authentication authentication) {
+        Exam exam = examRepository.findById(examId)
+                .orElseThrow(() -> new RuntimeException("Exam not found"));
+        examRepository.delete(exam);
+        return ResponseEntity.ok(Map.of("message", "Exam deleted successfully"));
+    }
+
     /**
      * NEW ENDPOINT: Get detailed platform statistics
      * Returns comprehensive analytics including exams, courses, enrollments
@@ -227,6 +243,58 @@ public class AdminController {
         
         // Return top 15 most recent
         return ResponseEntity.ok(activities.stream().limit(15).collect(Collectors.toList()));
+    }
+
+    @GetMapping("/courses")
+    public ResponseEntity<List<Map<String, Object>>> getAllCourses(Authentication authentication) {
+        List<Course> courses = courseRepository.findAll();
+        
+        List<Map<String, Object>> courseList = courses.stream().map(course -> {
+            Map<String, Object> data = new HashMap<>();
+            data.put("id", course.getId());
+            data.put("title", course.getTitle());
+            data.put("description", course.getDescription());
+            data.put("instructorName", course.getInstructor() != null ? course.getInstructor().getName() : "N/A");
+            data.put("instructorId", course.getInstructor() != null ? course.getInstructor().getId() : null);
+            
+            long enrollmentCount = enrollmentRepository.findByCourse(course).size();
+            data.put("enrollmentCount", enrollmentCount);
+            
+            long examCount = examRepository.findByCourse(course).size();
+            data.put("examCount", examCount);
+            
+            return data;
+        }).collect(Collectors.toList());
+        
+        return ResponseEntity.ok(courseList);
+    }
+
+    @GetMapping("/exams")
+    public ResponseEntity<List<Map<String, Object>>> getAllExams(Authentication authentication) {
+        List<Exam> exams = examRepository.findAll();
+        
+        List<Map<String, Object>> examList = exams.stream().map(exam -> {
+            Map<String, Object> data = new HashMap<>();
+            data.put("id", exam.getId());
+            data.put("title", exam.getTitle());
+            data.put("description", exam.getDescription());
+            data.put("courseTitle", exam.getCourse() != null ? exam.getCourse().getTitle() : "N/A");
+            data.put("courseId", exam.getCourse() != null ? exam.getCourse().getId() : null);
+            data.put("instructorName", exam.getInstructor() != null ? exam.getInstructor().getName() : "N/A");
+            data.put("instructorId", exam.getInstructor() != null ? exam.getInstructor().getId() : null);
+            data.put("startTime", exam.getStartTime());
+            data.put("endTime", exam.getEndTime());
+            data.put("durationMinutes", exam.getDurationMinutes());
+            data.put("totalQuestions", exam.getTotalQuestions());
+            data.put("maxAttempts", exam.getMaxAttempts());
+            
+            long attemptsCount = examAttemptRepository.findByExam(exam).size();
+            data.put("attemptsCount", attemptsCount);
+            
+            return data;
+        }).collect(Collectors.toList());
+        
+        return ResponseEntity.ok(examList);
     }
 
     /**

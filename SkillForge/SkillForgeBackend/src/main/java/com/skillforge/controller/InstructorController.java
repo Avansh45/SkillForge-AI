@@ -238,5 +238,25 @@ public class InstructorController {
 
         return ResponseEntity.ok(attemptData);
     }
+
+    @DeleteMapping("/exams/{examId}")
+    public ResponseEntity<Map<String, String>> deleteExam(
+            @PathVariable Long examId,
+            Authentication authentication) {
+        
+        String email = authentication.getName();
+        User instructor = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Instructor not found"));
+
+        Exam exam = examRepository.findById(examId)
+                .orElseThrow(() -> new RuntimeException("Exam not found"));
+
+        if (!exam.getInstructor().getId().equals(instructor.getId())) {
+            throw new RuntimeException("You do not have permission to delete this exam");
+        }
+
+        examRepository.delete(exam);
+        return ResponseEntity.ok(Map.of("message", "Exam deleted successfully"));
+    }
 }
 
