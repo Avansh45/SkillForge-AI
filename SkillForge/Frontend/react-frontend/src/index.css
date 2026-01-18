@@ -63,8 +63,6 @@ body{
 .small{font-size:13px;color:var(--muted)}
 .list{list-style:none}
 .list li{padding:8px 0;border-bottom:1px dashed var(--border);display:flex;justify-content:space-between}
-<<<<<<< HEAD
-=======
 /* ContactSection styles */
 .contact-section { padding: 56px 0; }
 .contact-grid { display: grid; gap: 20px; grid-template-columns: 1fr 1fr; align-items:start; }
@@ -88,4 +86,3 @@ body{
 .section-heading h2 { margin-bottom:6px; }
 .small { font-size:13px; color:var(--muted); }
 .muted { color:var(--muted); font-size:13px; }
->>>>>>> aacea16 (Merge TempBranch changes)

@@ -11,8 +11,6 @@ const Navbar = ({ items, activeSection, onSectionChange }) => {
 
   return (
     <nav className="dash-nav">
-<<<<<<< HEAD
-=======
       <button
         type="button"
         className={`nav-toggle ${isOpen ? 'open' : ''}`}
@@ -26,7 +24,6 @@ const Navbar = ({ items, activeSection, onSectionChange }) => {
         <span aria-hidden="true"></span>
         <span aria-hidden="true"></span>
       </button>
->>>>>>> aacea16 (Merge TempBranch changes)
       <ul id="dashNavLinks" className={isOpen ? 'open' : ''}>
         {items.map((item) => (
           <li key={item.key}>
@@ -44,18 +41,6 @@ const Navbar = ({ items, activeSection, onSectionChange }) => {
           </li>
         ))}
       </ul>
-<<<<<<< HEAD
-      <button
-        className="nav-toggle"
-        id="dashNavToggle"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-=======
->>>>>>> aacea16 (Merge TempBranch changes)
     </nav>
   );
 };

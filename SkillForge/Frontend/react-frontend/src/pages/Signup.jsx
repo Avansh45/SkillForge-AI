@@ -11,11 +11,7 @@ const Signup = ({ isOpen, onClose }) => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-<<<<<<< HEAD
-  const handleSubmit = (e) => {
-=======
   const handleSubmit = async (e) => {
->>>>>>> aacea16 (Merge TempBranch changes)
     e.preventDefault();
     setError('');
 
@@ -24,25 +20,15 @@ const Signup = ({ isOpen, onClose }) => {
       return;
     }
 
-<<<<<<< HEAD
-    const result = registerUser(role, name.trim(), email.trim(), password.trim());
-=======
     const result = await registerUser(role, name.trim(), email.trim(), password.trim());
->>>>>>> aacea16 (Merge TempBranch changes)
 
     if (!result.success) {
       setError(result.error);
       return;
     }
 
-<<<<<<< HEAD
-    // Save session and redirect
-    saveUserSession(role, name.trim(), email.trim());
-    const dashboardPath = getDashboardPath(role);
-=======
     // Session is saved in registerUser function, just redirect
     const dashboardPath = getDashboardPath(result.user.role);
->>>>>>> aacea16 (Merge TempBranch changes)
     navigate(dashboardPath);
   };
 
