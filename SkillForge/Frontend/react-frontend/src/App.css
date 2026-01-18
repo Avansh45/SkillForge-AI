@@ -46,12 +46,11 @@ img {
 section {
   padding: 80px 0;
   scroll-margin-top: 80px;
-<<<<<<< HEAD
-=======
+
   background: linear-gradient(to bottom, #ecfdf3, #ffffff);
   position: relative;
   box-shadow: inset 0 1px 0 0 rgba(187, 247, 208, 0.5), inset 0 -1px 0 0 rgba(187, 247, 208, 0.3);
->>>>>>> aacea16 (Merge TempBranch changes)
+
 }
 
 /* Header Styles */
@@ -364,15 +363,7 @@ header {
 .hero-right-floating {
   position: absolute;
   right: 16px;
-<<<<<<< HEAD
-  top: 16px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.9);
-  font-size: 11px;
-  border: 1px solid #d1fae5;
-  color: var(--muted);
-=======
+
   top: 1px;
   padding: 4px 6px;
   border-radius: 999px;
@@ -382,7 +373,7 @@ header {
   color: var(--muted);
   pointer-events: none;
   z-index: 1;
->>>>>>> aacea16 (Merge TempBranch changes)
+
 }
 
 .hero-right-floating span {
@@ -589,10 +580,8 @@ header {
 
 /* AI Section */
 #ai {
-<<<<<<< HEAD
-  background: linear-gradient(to bottom, #ecfdf3, #ffffff);
-=======
->>>>>>> aacea16 (Merge TempBranch changes)
+
+
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
 }
@@ -880,13 +869,7 @@ textarea {
   color: var(--muted);
 }
 
-<<<<<<< HEAD
-.dash-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-top: 1px solid var(--border);
-=======
+
 /* Dashboard Layout */
 .dashboard-layout {
   display: flex;
@@ -915,44 +898,13 @@ textarea {
   display: flex;
   flex-direction: column;
   padding: 0;
->>>>>>> aacea16 (Merge TempBranch changes)
+
 }
 
 .dash-nav ul {
   list-style: none;
   display: flex;
-<<<<<<< HEAD
-  gap: 18px;
-  font-size: 13px;
-  padding: 8px 0;
-}
 
-.dash-nav a {
-  color: var(--muted);
-  padding-bottom: 4px;
-  position: relative;
-}
-
-.dash-nav a:hover,
-.dash-nav a.active {
-  color: var(--primary-dark);
-}
-
-.dash-nav a::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 0;
-  height: 2px;
-  background: linear-gradient(to right, var(--primary), var(--accent));
-  transition: width 0.2s ease-in-out;
-}
-
-.dash-nav a:hover::after,
-.dash-nav a.active::after {
-  width: 100%;
-=======
   flex-direction: column;
   gap: 4px;
   font-size: 14px;
@@ -998,7 +950,7 @@ textarea {
 
 .dash-nav a::after {
   display: none;
->>>>>>> aacea16 (Merge TempBranch changes)
+
 }
 
 .dash-nav .nav-toggle {
@@ -1010,10 +962,9 @@ textarea {
   cursor: pointer;
   background: transparent;
   border: none;
-<<<<<<< HEAD
-=======
+
   margin-bottom: 12px;
->>>>>>> aacea16 (Merge TempBranch changes)
+
 }
 
 .dash-nav .nav-toggle span {
@@ -1023,12 +974,8 @@ textarea {
   background: #111827;
 }
 
-<<<<<<< HEAD
-main {
-  padding: 24px 0 40px;
-}
-=======
->>>>>>> aacea16 (Merge TempBranch changes)
+
+
 
 .section-block {
   margin-bottom: 26px;
@@ -1228,20 +1175,7 @@ main {
     scroll-margin-top: 80px;
   }
 
-<<<<<<< HEAD
-  .dash-nav ul {
-    display: none;
-    flex-direction: column;
-    padding: 8px 0 10px;
-  }
 
-  .dash-nav ul.open {
-    display: flex;
-  }
-
-  .dash-nav .nav-toggle {
-    display: flex;
-=======
   .dashboard-layout {
     flex-direction: column;
   }
@@ -1317,7 +1251,7 @@ main {
 
   .dash-nav ul.open {
     transform: translateX(0);
->>>>>>> aacea16 (Merge TempBranch changes)
+
   }
 }
 

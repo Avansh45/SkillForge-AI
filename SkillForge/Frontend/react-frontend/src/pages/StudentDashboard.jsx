@@ -56,51 +56,36 @@ const StudentDashboard = () => {
             </div>
 
             <div className="dash-title">
-<<<<<<< HEAD
-              <strong>Student Dashboard</strong><br />
-              <span className="muted">Personalised workspace for your learning journey</span>
-            </div>
 
-            <div className="user-area">
-              <span className="muted">Student</span>
-=======
               <strong>Student Dashboard</strong>
             </div>
 
             <div className="user-area">
               <span className="muted">{user?.name || 'Student'}</span>
->>>>>>> aacea16 (Merge TempBranch changes)
+
               <button className="btn btn-outline logout-btn" onClick={handleLogout}>
                 Logout
               </button>
             </div>
           </div>
-<<<<<<< HEAD
 
-=======
         </div>
       </header>
 
       <div className="dashboard-layout">
         <aside className="dashboard-sidebar">
->>>>>>> aacea16 (Merge TempBranch changes)
+
           <Navbar
             items={navItems}
             activeSection={activeSection}
             onSectionChange={handleSectionChange}
           />
-<<<<<<< HEAD
-        </div>
-      </header>
 
-      <main>
-        <div className="container">
-=======
         </aside>
 
         <main className="dashboard-main">
           <div className="container">
->>>>>>> aacea16 (Merge TempBranch changes)
+
           <section id="studentSection">
             {/* Overview Section */}
             <div className="section-block" data-section="overview">
@@ -391,14 +376,11 @@ const StudentDashboard = () => {
               </div>
             </div>
           </section>
-<<<<<<< HEAD
-        </div>
-      </main>
-=======
+
           </div>
         </main>
       </div>
->>>>>>> aacea16 (Merge TempBranch changes)
+
 
       <Footer />
     </>
