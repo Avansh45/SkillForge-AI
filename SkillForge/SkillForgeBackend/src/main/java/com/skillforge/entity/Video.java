@@ -1,9 +1,6 @@
 package com.skillforge.entity;
 
-<<<<<<< HEAD
-=======
 import com.fasterxml.jackson.annotation.JsonIgnore;
->>>>>>> TempBranch
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,10 +26,7 @@ public class Video {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id", nullable = false)
-<<<<<<< HEAD
-=======
     @JsonIgnore
->>>>>>> TempBranch
     private Course course;
 
     @Column(name = "video_type")

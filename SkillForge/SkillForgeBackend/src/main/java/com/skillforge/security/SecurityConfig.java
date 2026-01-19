@@ -4,10 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-<<<<<<< HEAD
-=======
 import org.springframework.http.HttpMethod;
->>>>>>> TempBranch
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -42,12 +39,6 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**", "/api/contact").permitAll()
-<<<<<<< HEAD
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/instructors/**").hasAnyRole("INSTRUCTOR", "ADMIN")
-                .requestMatchers("/api/students/**", "/api/enrollments/**", "/api/performance/**").hasAnyRole("STUDENT", "INSTRUCTOR", "ADMIN")
-                .requestMatchers("/api/courses/**").authenticated()
-=======
                 .requestMatchers(HttpMethod.GET, "/api/courses", "/api/courses/*").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/instructors/**").hasAnyRole("INSTRUCTOR", "ADMIN")
@@ -56,7 +47,6 @@ public class SecurityConfig {
                 .requestMatchers("/api/exam-submissions/**").hasAnyRole("STUDENT", "INSTRUCTOR", "ADMIN")
                 .requestMatchers("/api/students/**", "/api/enrollments/**", "/api/performance/**").hasAnyRole("STUDENT", "INSTRUCTOR", "ADMIN")
                 .requestMatchers("/api/courses/**").hasAnyRole("INSTRUCTOR", "ADMIN", "STUDENT")
->>>>>>> TempBranch
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -68,12 +58,6 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-<<<<<<< HEAD
-        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
-=======
         // Split by comma and trim whitespace from each origin
         String[] origins = allowedOrigins.split(",");
         for (int i = 0; i < origins.length; i++) {
@@ -84,7 +68,6 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
->>>>>>> TempBranch
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

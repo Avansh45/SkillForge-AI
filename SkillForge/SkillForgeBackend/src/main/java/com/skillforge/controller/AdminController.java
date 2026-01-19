@@ -1,26 +1,15 @@
 package com.skillforge.controller;
 
-<<<<<<< HEAD
-import com.skillforge.entity.User;
-import com.skillforge.repository.UserRepository;
-=======
 import com.skillforge.entity.*;
 import com.skillforge.repository.*;
->>>>>>> TempBranch
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-<<<<<<< HEAD
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-=======
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
->>>>>>> TempBranch
 
 @RestController
 @RequestMapping("/api/admin")
@@ -29,8 +18,6 @@ public class AdminController {
 
     @Autowired
     private UserRepository userRepository;
-<<<<<<< HEAD
-=======
     
     @Autowired
     private ExamRepository examRepository;
@@ -46,7 +33,6 @@ public class AdminController {
     
     @Autowired
     private QuestionRepository questionRepository;
->>>>>>> TempBranch
 
     @GetMapping("/overview")
     public ResponseEntity<Map<String, Object>> getPlatformOverview(Authentication authentication) {
@@ -92,8 +78,6 @@ public class AdminController {
         userRepository.deleteById(userId);
         return ResponseEntity.ok(Map.of("message", "User deleted successfully"));
     }
-<<<<<<< HEAD
-=======
 
     @DeleteMapping("/courses/{courseId}")
     public ResponseEntity<Map<String, String>> deleteCourse(@PathVariable Long courseId, Authentication authentication) {
@@ -359,6 +343,5 @@ public class AdminController {
         
         return ResponseEntity.ok(performance);
     }
->>>>>>> TempBranch
 }
 

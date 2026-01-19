@@ -1,13 +1,5 @@
 package com.skillforge.controller;
 
-<<<<<<< HEAD
-import com.skillforge.entity.Batch;
-import com.skillforge.entity.Course;
-import com.skillforge.entity.User;
-import com.skillforge.repository.BatchRepository;
-import com.skillforge.repository.CourseRepository;
-import com.skillforge.repository.UserRepository;
-=======
 import com.skillforge.dto.AiQuestionResponse;
 import com.skillforge.entity.Batch;
 import com.skillforge.entity.Course;
@@ -22,7 +14,6 @@ import com.skillforge.repository.ExamAttemptRepository;
 import com.skillforge.repository.QuestionRepository;
 import com.skillforge.repository.UserRepository;
 import com.skillforge.service.AiQuestionService;
->>>>>>> TempBranch
 import com.skillforge.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -32,17 +23,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-<<<<<<< HEAD
-
-@RestController
-@RequestMapping("/api/instructors")
-@CrossOrigin(origins = "*")
-=======
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/instructors")
->>>>>>> TempBranch
 public class InstructorController {
 
     @Autowired
@@ -57,8 +41,6 @@ public class InstructorController {
     @Autowired
     private BatchRepository batchRepository;
 
-<<<<<<< HEAD
-=======
     @Autowired
     private ExamRepository examRepository;
 
@@ -71,7 +53,6 @@ public class InstructorController {
     @Autowired
     private AiQuestionService aiQuestionService;
 
->>>>>>> TempBranch
     @GetMapping("/me")
     public ResponseEntity<Map<String, Object>> getInstructorProfile(Authentication authentication) {
         String email = authentication.getName();
@@ -115,8 +96,6 @@ public class InstructorController {
         List<Course> courses = courseService.getCoursesByInstructor(email);
         return ResponseEntity.ok(courses);
     }
-<<<<<<< HEAD
-=======
 
     @GetMapping("/exams")
     public ResponseEntity<List<Map<String, Object>>> getMyExams(Authentication authentication) {
@@ -379,6 +358,5 @@ public class InstructorController {
 
         return ResponseEntity.ok(response);
     }
->>>>>>> TempBranch
 }
 

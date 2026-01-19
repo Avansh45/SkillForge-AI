@@ -1,12 +1,6 @@
 package com.skillforge.controller;
 
 import com.skillforge.entity.Enrollment;
-<<<<<<< HEAD
-import com.skillforge.entity.ExamAttempt;
-import com.skillforge.entity.User;
-import com.skillforge.repository.EnrollmentRepository;
-import com.skillforge.repository.ExamAttemptRepository;
-=======
 import com.skillforge.entity.Exam;
 import com.skillforge.entity.ExamAttempt;
 import com.skillforge.entity.Question;
@@ -15,7 +9,6 @@ import com.skillforge.repository.EnrollmentRepository;
 import com.skillforge.repository.ExamAttemptRepository;
 import com.skillforge.repository.ExamRepository;
 import com.skillforge.repository.QuestionRepository;
->>>>>>> TempBranch
 import com.skillforge.repository.UserRepository;
 import com.skillforge.service.EnrollmentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,15 +37,12 @@ public class StudentController {
     @Autowired
     private ExamAttemptRepository examAttemptRepository;
 
-<<<<<<< HEAD
-=======
     @Autowired
     private ExamRepository examRepository;
 
     @Autowired
     private QuestionRepository questionRepository;
 
->>>>>>> TempBranch
     @GetMapping("/me")
     public ResponseEntity<Map<String, Object>> getStudentProfile(Authentication authentication) {
         String email = authentication.getName();
@@ -117,8 +107,6 @@ public class StudentController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
-<<<<<<< HEAD
-=======
 
     @GetMapping("/exams")
     public ResponseEntity<List<Map<String, Object>>> getStudentExams(Authentication authentication) {
@@ -324,6 +312,5 @@ public class StudentController {
 
         return ResponseEntity.ok(result);
     }
->>>>>>> TempBranch
 }
 

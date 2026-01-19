@@ -2,10 +2,7 @@ package com.skillforge.service;
 
 import com.skillforge.dto.AuthRequest;
 import com.skillforge.dto.AuthResponse;
-<<<<<<< HEAD
-=======
 import com.skillforge.dto.ChangePasswordRequest;
->>>>>>> TempBranch
 import com.skillforge.dto.RegisterRequest;
 import com.skillforge.entity.User;
 import com.skillforge.repository.UserRepository;
@@ -38,8 +35,6 @@ public class AuthService {
             return new AuthResponse(null, null, null, null, "Invalid role");
         }
 
-<<<<<<< HEAD
-=======
         // Restrict admin registration
         if (role == User.Role.ADMIN) {
             // Only allow one admin with specific credentials
@@ -51,7 +46,6 @@ public class AuthService {
             }
         }
 
->>>>>>> TempBranch
         User user = new User();
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -64,8 +58,6 @@ public class AuthService {
         return new AuthResponse(token, user.getEmail(), user.getName(), user.getRole().name(), "Registration successful");
     }
 
-<<<<<<< HEAD
-=======
     public AuthResponse changePassword(String email, ChangePasswordRequest request) {
         User user = userRepository.findByEmail(email).orElse(null);
         if (user == null) {
@@ -80,7 +72,6 @@ public class AuthService {
         return new AuthResponse(token, user.getEmail(), user.getName(), user.getRole().name(), "Password changed successfully");
     }
 
->>>>>>> TempBranch
     public AuthResponse login(AuthRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElse(null);

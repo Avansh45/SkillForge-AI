@@ -1,9 +1,6 @@
 package com.skillforge.entity;
 
-<<<<<<< HEAD
-=======
 import com.fasterxml.jackson.annotation.JsonIgnore;
->>>>>>> TempBranch
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,10 +23,7 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-<<<<<<< HEAD
-=======
     @JsonIgnore
->>>>>>> TempBranch
     @Column(nullable = false)
     private String password;
 
@@ -46,14 +40,6 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-<<<<<<< HEAD
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
-    private Set<Enrollment> enrollments = new HashSet<>();
-
-    @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL)
-    private Set<Course> courses = new HashSet<>();
-
-=======
     @JsonIgnore
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private Set<Enrollment> enrollments = new HashSet<>();
@@ -63,7 +49,6 @@ public class User {
     private Set<Course> courses = new HashSet<>();
 
     @JsonIgnore
->>>>>>> TempBranch
     @OneToMany(mappedBy = "instructor", cascade = CascadeType.ALL)
     private Set<Batch> batches = new HashSet<>();
 
