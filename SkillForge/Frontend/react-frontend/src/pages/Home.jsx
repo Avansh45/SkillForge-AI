@@ -1,9 +1,13 @@
-// src/pages/Home.jsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Login from './Login';
 import Signup from './Signup';
+import ContactSection from '../components/ContactSection';
+import { useCourses } from '../hooks';
+import { enrollInCourse } from '../api/studentService';
+import { getUserSession } from '../utils/auth';
 
 import ContactSection from '../components/ContactSection';
 
@@ -11,10 +15,62 @@ import ContactSection from '../components/ContactSection';
 const Home = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignupOpen, setIsSignupOpen] = useState(false);
+  const [formSuccess, setFormSuccess] = useState('');
+  const [formError, setFormError] = useState('');
+  const [enrolling, setEnrolling] = useState(null);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+  
+  // Use custom hook for courses
+  const { courses, loading: loadingCourses, error: coursesError } = useCourses();
 
+<<<<<<< HEAD
 
   const [formSuccess, setFormSuccess] = useState('');
   const [formError, setFormError] = useState('');
+=======
+  // Fetch user session on mount
+  useEffect(() => {
+    const currentUser = getUserSession();
+    setUser(currentUser);
+  }, []);
+
+  const handleCourseClick = (course) => {
+    if (!user) {
+      setIsLoginOpen(true);
+      return;
+    }
+    // If user is student, stay on page to enroll
+    // If instructor/admin, could navigate to dashboard
+    if (user.role !== 'STUDENT') {
+      navigate(`/${user.role.toLowerCase()}`);
+    }
+  };
+
+  const handleEnroll = async (courseId, e) => {
+    e.stopPropagation();
+    
+    if (!user) {
+      setIsLoginOpen(true);
+      return;
+    }
+
+    if (user.role !== 'STUDENT') {
+      alert('⚠️ Only students can enroll in courses');
+      return;
+    }
+
+    setEnrolling(courseId);
+    try {
+      await enrollInCourse(courseId);
+      alert('✅ Successfully enrolled in course! Check your Student Dashboard.');
+    } catch (err) {
+      alert('❌ ' + (err.message || 'Failed to enroll. You may already be enrolled.'));
+    } finally {
+      setEnrolling(null);
+    }
+  };
+>>>>>>> TempBranch
 
   const handleContactSubmit = async (data) => {
     setFormError('');
@@ -56,7 +112,10 @@ const Home = () => {
       setFormError('Something went wrong while sending your message. Please try again.');
       return false;
     }
+<<<<<<< HEAD
 
+=======
+>>>>>>> TempBranch
   };
 
   return (
@@ -168,23 +227,6 @@ const Home = () => {
                 </li>
               </ul>
             </div>
-
-            <div className="about-card">
-              <h3>Adaptive Learning Snapshot</h3>
-              <p>
-                Imagine 2 learners attempting the same Java test. SkillForge's AI detects their strengths in real time, dynamically swapping questions and recommending micro-lessons for weak concepts. No two learning paths look exactly the same.
-              </p>
-              <div className="about-metric">
-                <div>
-                  <strong>40%</strong>
-                  <span>Question reuse</span>
-                </div>
-                <div>
-                  <strong>6 hrs/week</strong>
-                  <span>Manual work saved</span>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -193,7 +235,10 @@ const Home = () => {
       <section id="features">
         <div className="container">
           <div className="section-heading">
+<<<<<<< HEAD
 
+=======
+>>>>>>> TempBranch
             <h2>Platform Features</h2>
             <p>Everything you need to run adaptive learning and assessments in one place.</p>
           </div>
@@ -230,7 +275,10 @@ const Home = () => {
                 <li>Assignment scheduling</li>
                 <li>Role-based access</li>
               </ul>
+<<<<<<< HEAD
 
+=======
+>>>>>>> TempBranch
             </div>
           </div>
         </div>
@@ -240,6 +288,7 @@ const Home = () => {
       <section id="courses">
         <div className="container">
           <div className="section-heading">
+<<<<<<< HEAD
 
             <h2>Popular Course Tracks</h2>
             <p>Ready-made tracks to help students and teams ramp up faster.</p>
@@ -279,11 +328,81 @@ const Home = () => {
               </div>
             </div>
           </div>
+=======
+            <h2>Popular Course Tracks</h2>
+            <p>Ready-made tracks to help students and teams ramp up faster.</p>
+          </div>
+
+          {loadingCourses ? (
+            <div style={{ padding: '4rem 0', textAlign: 'center', color: '#666' }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '1rem', animation: 'spin 1s linear infinite' }}>⏳</div>
+              <p style={{ fontSize: '1.125rem', margin: 0 }}>Loading courses...</p>
+            </div>
+          ) : coursesError ? (
+            <div style={{ padding: '3rem', textAlign: 'center', background: '#ffebee', borderRadius: '12px', border: '1px solid #ffcdd2' }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>⚠️</div>
+              <p style={{ color: '#d32f2f', fontWeight: '500', marginBottom: '0.5rem' }}>Failed to load courses</p>
+              <p style={{ color: '#666', fontSize: '0.875rem', margin: 0 }}>{coursesError}</p>
+            </div>
+          ) : courses.length === 0 ? (
+            <div style={{ padding: '4rem 0', textAlign: 'center', color: '#666' }}>
+              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📚</div>
+              <p style={{ fontSize: '1.25rem', fontWeight: '500', marginBottom: '0.5rem' }}>No courses available yet</p>
+              <p style={{ fontSize: '0.875rem', margin: 0 }}>Check back soon for new courses!</p>
+            </div>
+          ) : (
+            <div className="course-grid">
+              {courses.map((course) => (
+                <div 
+                  key={course.id} 
+                  className="course-card"
+                  onClick={() => handleCourseClick(course)}
+                  style={{ cursor: 'pointer', transition: 'transform 0.2s' }}
+                  onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                >
+                  <span className="pill">Course</span>
+                  <h3>{course.title}</h3>
+                  <p>{course.description || 'Comprehensive course content designed for effective learning.'}</p>
+                  <div className="course-meta">
+                    {course.instructor?.name && (
+                      <span>👨‍🏫 {course.instructor.name}</span>
+                    )}
+                    <span>ID: {course.id}</span>
+                  </div>
+                  {user?.role === 'STUDENT' && (
+                    <button
+                      className="btn btn-primary"
+                      onClick={(e) => handleEnroll(course.id, e)}
+                      disabled={enrolling === course.id}
+                      style={{
+                        width: '100%',
+                        marginTop: '1rem',
+                        opacity: enrolling === course.id ? 0.6 : 1,
+                        cursor: enrolling === course.id ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      {enrolling === course.id ? 'Enrolling...' : 'Enroll Now'}
+                    </button>
+                  )}
+                  {!user && (
+                    <div style={{ marginTop: '1rem', padding: '0.5rem', background: '#ecfdf3', borderRadius: '6px', fontSize: '0.875rem', color: '#16a34a' }}>
+                      👉 Login to enroll
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+>>>>>>> TempBranch
         </div>
       </section>
 
       {/* AI Engine Section */}
+<<<<<<< HEAD
 
+=======
+>>>>>>> TempBranch
       <section id="ai" className="ai-section">
         <div className="container">
           <div className="section-heading">
@@ -307,17 +426,26 @@ const Home = () => {
             <div className="ai-card">
               <h3>Feedback Loops</h3>
               <p>Captures question-level feedback to improve future recommendations and item quality.</p>
+<<<<<<< HEAD
 
+=======
+>>>>>>> TempBranch
             </div>
           </div>
         </div>
       </section>
 
+<<<<<<< HEAD
 
       {/* Contact Section (component) */}
       <ContactSection onSubmit={handleContactSubmit} />
 
 
+=======
+      {/* Contact Section (component) */}
+      <ContactSection onSubmit={handleContactSubmit} />
+
+>>>>>>> TempBranch
       <Footer />
 
       {/* Modals */}

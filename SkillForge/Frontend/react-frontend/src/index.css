@@ -63,7 +63,10 @@ body{
 .small{font-size:13px;color:var(--muted)}
 .list{list-style:none}
 .list li{padding:8px 0;border-bottom:1px dashed var(--border);display:flex;justify-content:space-between}
+<<<<<<< HEAD
 
+=======
+>>>>>>> TempBranch
 /* ContactSection styles */
 .contact-section { padding: 56px 0; }
 .contact-grid { display: grid; gap: 20px; grid-template-columns: 1fr 1fr; align-items:start; }
@@ -88,4 +91,12 @@ body{
 .small { font-size:13px; color:var(--muted); }
 .muted { color:var(--muted); font-size:13px; }
 
+<<<<<<< HEAD
 
+=======
+/* Loading spinner animation */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+>>>>>>> TempBranch

@@ -51,10 +51,35 @@ const ContactSection = ({ onSubmit }) => {
         </div>
 
         <div className="contact-grid">
+<<<<<<< HEAD
           <div className="contact-info card">
             <p><strong>Email:</strong> contact@skillforge.ai</p>
             <p><strong>Use cases:</strong> College training, placement cells, coaching institutes, internal assessments.</p>
             <p><strong>Note:</strong> Dashboards for Students, Instructors, and Admins can be customised to your requirements.</p>
+=======
+          <div className="contact-info card" style={{ background: '#fff', boxShadow: '0 2px 16px 0 rgba(34,197,94,0.07)' }}>
+            <h3 style={{ color: '#16a34a', marginBottom: 8 }}>Connect with SkillForge</h3>
+            <p style={{ fontSize: '1.08rem', marginBottom: 10 }}>
+              <strong>Empowering adaptive learning for everyone.</strong>
+            </p>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              <li style={{ marginBottom: 8 }}>
+                <span style={{ fontWeight: 500, color: '#0f172a' }}>Email:</span> <a href="mailto:contact@skillforge.ai" style={{ color: '#16a34a', textDecoration: 'underline' }}>contact@skillforge.ai</a>
+              </li>
+              <li style={{ marginBottom: 8 }}>
+                <span style={{ fontWeight: 500, color: '#0f172a' }}>For:</span> Students, Instructors, Admins, Institutes
+              </li>
+              <li style={{ marginBottom: 8 }}>
+                <span style={{ fontWeight: 500, color: '#0f172a' }}>Why SkillForge?</span> Personalized dashboards, AI-driven exams, real-time analytics, and seamless collaboration.
+              </li>
+              <li style={{ marginBottom: 8 }}>
+                <span style={{ fontWeight: 500, color: '#0f172a' }}>Get a Demo:</span> Reach out to see SkillForge in action for your team or institution.
+              </li>
+            </ul>
+            <div style={{ marginTop: 14, fontSize: '0.98rem', color: '#64748b' }}>
+              <span style={{ fontWeight: 500, color: '#16a34a' }}>SkillForge</span> — Modern learning, made simple.
+            </div>
+>>>>>>> TempBranch
           </div>
 
           <div className="contact-form card">

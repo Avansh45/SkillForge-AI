@@ -1,4 +1,5 @@
 import axios from 'axios';
+<<<<<<< HEAD
 
 const API_BASE_URL = 'http://localhost:8080/api';
 
@@ -7,13 +8,38 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+=======
+import { getToken, logout } from '../utils/auth';
+
+const apiClient = axios.create({
+  baseURL: 'http://localhost:8080/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 300000, // 5 minutes for AI generation (supports up to 100 questions)
+>>>>>>> TempBranch
 });
 
 apiClient.interceptors.request.use(
   (config) => {
+<<<<<<< HEAD
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+=======
+    const token = getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+      
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (Date.now() >= payload.exp * 1000) {
+          logout();
+          window.location.href = '/login';
+        }
+      } catch (e) {
+      }
+>>>>>>> TempBranch
     }
     return config;
   },
@@ -23,6 +49,7 @@ apiClient.interceptors.request.use(
 );
 
 apiClient.interceptors.response.use(
+<<<<<<< HEAD
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
@@ -30,6 +57,48 @@ apiClient.interceptors.response.use(
       localStorage.removeItem('user');
       window.location.href = '/login';
     }
+=======
+  (response) => {
+    return response.data;
+  },
+  (error) => {
+    if (!error.response) {
+      if (!navigator.onLine) {
+        error.message = 'No internet connection. Please check your network.';
+      } else if (error.code === 'ECONNABORTED') {
+        error.message = 'Request timeout. Please try again.';
+      } else {
+        error.message = 'Network error. Please try again.';
+      }
+      return Promise.reject(error);
+    }
+
+    const { status, data } = error.response;
+
+    switch (status) {
+      case 401:
+        logout();
+        window.location.href = '/login';
+        error.message = 'Session expired. Please login again.';
+        break;
+
+      case 403:
+        error.message = 'You do not have permission to perform this action. Please ensure you are logged in with the correct role.';
+        break;
+
+      case 404:
+        error.message = data?.message || 'Resource not found.';
+        break;
+
+      case 500:
+        error.message = data?.message || 'Server error. Please try again later.';
+        break;
+
+      default:
+        error.message = data?.message || error.message || 'Request failed.';
+    }
+
+>>>>>>> TempBranch
     return Promise.reject(error);
   }
 );

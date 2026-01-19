@@ -10,9 +10,13 @@ const Login = ({ isOpen, onClose }) => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+<<<<<<< HEAD
 
   const handleSubmit = async (e) => {
 
+=======
+  const handleSubmit = async (e) => {
+>>>>>>> TempBranch
     e.preventDefault();
     setError('');
 
@@ -21,18 +25,26 @@ const Login = ({ isOpen, onClose }) => {
       return;
     }
 
+<<<<<<< HEAD
 
     const result = await loginUser(role, email.trim(), password.trim());
 
+=======
+    const result = await loginUser(email.trim(), password.trim(), role);
+>>>>>>> TempBranch
 
     if (!result.success) {
       setError(result.error);
       return;
     }
 
+<<<<<<< HEAD
 
     // Session is saved in loginUser function, just redirect
 
+=======
+    // Session is saved in loginUser function, just redirect
+>>>>>>> TempBranch
     const dashboardPath = getDashboardPath(result.user.role);
     navigate(dashboardPath);
   };

@@ -26,6 +26,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         final String authorizationHeader = request.getHeader("Authorization");
+<<<<<<< HEAD
+=======
+        final String requestURI = request.getRequestURI();
+        final String method = request.getMethod();
+
+        System.out.println("\n=== JWT FILTER START ===");
+        System.out.println("Request: " + method + " " + requestURI);
+        System.out.println("Authorization Header Present: " + (authorizationHeader != null));
+>>>>>>> TempBranch
 
         String email = null;
         String jwt = null;
@@ -36,6 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 email = jwtUtil.getEmailFromToken(jwt);
                 role = jwtUtil.getRoleFromToken(jwt);
+<<<<<<< HEAD
             } catch (Exception e) {
                 // Invalid token
             }
@@ -43,12 +53,42 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             if (jwtUtil.validateToken(jwt, email)) {
+=======
+                System.out.println("✓ Token parsed successfully");
+                System.out.println("  Email: " + email);
+                System.out.println("  Role: " + role);
+                System.out.println("  Authority to set: ROLE_" + role);
+            } catch (Exception e) {
+                System.out.println("✗ Error parsing token: " + e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println("✗ No Bearer token found");
+        }
+
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            System.out.println("Validating token for email: " + email);
+            if (jwtUtil.validateToken(jwt, email)) {
+                System.out.println("✓ Token validation SUCCESS");
+>>>>>>> TempBranch
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         email, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role)));
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+<<<<<<< HEAD
             }
         }
+=======
+                System.out.println("✓ Authentication set: " + email);
+                System.out.println("  Authorities: " + authToken.getAuthorities());
+            } else {
+                System.out.println("✗ Token validation FAILED");
+            }
+        } else {
+            System.out.println("Skipping auth setup - email=" + email + ", existing-auth=" + (SecurityContextHolder.getContext().getAuthentication() != null));
+        }
+        System.out.println("=== JWT FILTER END ===\n");
+>>>>>>> TempBranch
         chain.doFilter(request, response);
     }
 }

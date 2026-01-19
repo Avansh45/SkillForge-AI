@@ -11,9 +11,13 @@ const Signup = ({ isOpen, onClose }) => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+<<<<<<< HEAD
 
   const handleSubmit = async (e) => {
 
+=======
+  const handleSubmit = async (e) => {
+>>>>>>> TempBranch
     e.preventDefault();
     setError('');
 
@@ -22,19 +26,28 @@ const Signup = ({ isOpen, onClose }) => {
       return;
     }
 
+<<<<<<< HEAD
 
     const result = await registerUser(role, name.trim(), email.trim(), password.trim());
 
+=======
+    const result = await registerUser(role, name.trim(), email.trim(), password.trim());
+>>>>>>> TempBranch
 
     if (!result.success) {
       setError(result.error);
       return;
     }
 
+<<<<<<< HEAD
 
     // Session is saved in registerUser function, just redirect
     const dashboardPath = getDashboardPath(result.user.role);
 
+=======
+    // Session is saved in registerUser function, just redirect
+    const dashboardPath = getDashboardPath(result.user.role);
+>>>>>>> TempBranch
     navigate(dashboardPath);
   };
 

@@ -1,5 +1,9 @@
 package com.skillforge.entity;
 
+<<<<<<< HEAD
+=======
+import com.fasterxml.jackson.annotation.JsonIgnore;
+>>>>>>> TempBranch
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,9 +23,16 @@ public class Enrollment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)
+<<<<<<< HEAD
     private User student;
 
     @ManyToOne(fetch = FetchType.LAZY)
+=======
+    @JsonIgnore
+    private User student;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+>>>>>>> TempBranch
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 

@@ -3,7 +3,7 @@
 :root {
   --primary: #16a34a;
   --primary-dark: #15803d;
-  --bg: #f3f4f6;
+  --bg: #e5f7ec;
   --bg-light: #ffffff;
   --card-bg: #ffffff;
   --accent: #22c55e;
@@ -21,7 +21,7 @@
 
 body {
   font-family: "Poppins", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: radial-gradient(circle at top, #e5f7ec 0, #f3f4f6 40%, #f9fafb 100%);
+  background: #e5f7ec;
   color: var(--text);
   line-height: 1.6;
   scroll-behavior: smooth;
@@ -46,11 +46,17 @@ img {
 section {
   padding: 80px 0;
   scroll-margin-top: 80px;
+<<<<<<< HEAD
 
   background: linear-gradient(to bottom, #ecfdf3, #ffffff);
   position: relative;
   box-shadow: inset 0 1px 0 0 rgba(187, 247, 208, 0.5), inset 0 -1px 0 0 rgba(187, 247, 208, 0.3);
 
+=======
+  background: transparent;
+  position: relative;
+  box-shadow: inset 0 1px 0 0 rgba(187, 247, 208, 0.5), inset 0 -1px 0 0 rgba(187, 247, 208, 0.3);
+>>>>>>> TempBranch
 }
 
 /* Header Styles */
@@ -363,7 +369,10 @@ header {
 .hero-right-floating {
   position: absolute;
   right: 16px;
+<<<<<<< HEAD
 
+=======
+>>>>>>> TempBranch
   top: 1px;
   padding: 4px 6px;
   border-radius: 999px;
@@ -373,7 +382,10 @@ header {
   color: var(--muted);
   pointer-events: none;
   z-index: 1;
+<<<<<<< HEAD
 
+=======
+>>>>>>> TempBranch
 }
 
 .hero-right-floating span {
@@ -494,12 +506,19 @@ header {
 
 .card {
   border-radius: 20px;
-  background: #ffffff;
+  background: #fff;
   border: 1px solid var(--border);
   padding: 18px;
   font-size: 14px;
   box-shadow: 0 16px 40px rgba(15, 23, 42, 0.04);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+/* Ensure all home cards have white background */
+.about-card,
+.mini-card,
+.course-card,
+.ai-card {
+  background: #fff !important;
 }
 
 .card:hover {
@@ -534,7 +553,8 @@ header {
 
 .course-card {
   border-radius: 20px;
-  background: #ffffff;
+  background: transparent;
+  box-shadow: none !important;
   border: 1px solid var(--border);
   padding: 16px;
   font-size: 13px;
@@ -580,8 +600,11 @@ header {
 
 /* AI Section */
 #ai {
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> TempBranch
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
 }
@@ -645,10 +668,11 @@ header {
 
 .ai-card {
   border-radius: 20px;
-  background: #ffffff;
+  background: transparent;
+  box-shadow: none !important;
   border: 1px solid var(--border);
   padding: 18px;
-  font-size: 13px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
   box-shadow: 0 16px 40px rgba(22, 163, 74, 0.08);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
@@ -719,7 +743,8 @@ header {
 
 .contact-form {
   border-radius: 20px;
-  background: #ffffff;
+  background: transparent;
+  box-shadow: none !important;
   border: 1px solid var(--border);
   padding: 18px;
   font-size: 14px;
@@ -743,7 +768,8 @@ select {
   padding: 8px 10px;
   border-radius: 10px;
   border: 1px solid var(--border);
-  background: #ffffff;
+  background: transparent;
+  box-shadow: none !important;
   color: var(--text);
   font-family: inherit;
   font-size: 13px;
@@ -869,7 +895,10 @@ textarea {
   color: var(--muted);
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> TempBranch
 /* Dashboard Layout */
 .dashboard-layout {
   display: flex;
@@ -877,34 +906,55 @@ textarea {
 }
 
 .dashboard-sidebar {
+<<<<<<< HEAD
   width: 240px;
   min-height: calc(100vh - 80px);
   background: #ffffff;
   border-right: 1px solid var(--border);
+=======
+  width: 210px;
+  min-height: calc(100vh - 80px);
+  background: #fbfffc;
+  /* border-right: 1px solid var(--border); */
+>>>>>>> TempBranch
   padding: 24px 0;
   position: sticky;
   top: 80px;
   align-self: flex-start;
+<<<<<<< HEAD
   box-shadow: 2px 0 8px rgba(15, 23, 42, 0.04);
+=======
+  box-shadow: none;
+>>>>>>> TempBranch
 }
 
 .dashboard-main {
   flex: 1;
   padding: 24px 0 40px;
+<<<<<<< HEAD
   background: var(--bg);
+=======
+  background: #ecfdf3;
+>>>>>>> TempBranch
 }
 
 .dash-nav {
   display: flex;
   flex-direction: column;
   padding: 0;
+<<<<<<< HEAD
 
+=======
+>>>>>>> TempBranch
 }
 
 .dash-nav ul {
   list-style: none;
   display: flex;
+<<<<<<< HEAD
 
+=======
+>>>>>>> TempBranch
   flex-direction: column;
   gap: 4px;
   font-size: 14px;
@@ -950,7 +1000,10 @@ textarea {
 
 .dash-nav a::after {
   display: none;
+<<<<<<< HEAD
 
+=======
+>>>>>>> TempBranch
 }
 
 .dash-nav .nav-toggle {
@@ -962,9 +1015,13 @@ textarea {
   cursor: pointer;
   background: transparent;
   border: none;
+<<<<<<< HEAD
 
   margin-bottom: 12px;
 
+=======
+  margin-bottom: 12px;
+>>>>>>> TempBranch
 }
 
 .dash-nav .nav-toggle span {
@@ -974,8 +1031,11 @@ textarea {
   background: #111827;
 }
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> TempBranch
 
 .section-block {
   margin-bottom: 26px;
@@ -1175,7 +1235,10 @@ textarea {
     scroll-margin-top: 80px;
   }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> TempBranch
   .dashboard-layout {
     flex-direction: column;
   }
@@ -1251,7 +1314,10 @@ textarea {
 
   .dash-nav ul.open {
     transform: translateX(0);
+<<<<<<< HEAD
 
+=======
+>>>>>>> TempBranch
   }
 }
 

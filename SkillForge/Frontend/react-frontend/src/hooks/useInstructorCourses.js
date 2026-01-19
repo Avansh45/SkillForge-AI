@@ -1,11 +1,16 @@
 import { useState, useEffect } from 'react';
+<<<<<<< HEAD
 import { courseService } from '../api/courseService';
+=======
+import { getInstructorCourses } from '../api/courseService';
+>>>>>>> TempBranch
 
 export const useInstructorCourses = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+<<<<<<< HEAD
   const fetchInstructorCourses = async () => {
     try {
       setLoading(true);
@@ -15,12 +20,25 @@ export const useInstructorCourses = () => {
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to fetch instructor courses');
       console.error('Error fetching instructor courses:', err);
+=======
+  const fetchCourses = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getInstructorCourses();
+      setCourses(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Failed to load instructor courses:', err);
+      setError(err.message || 'Failed to load courses');
+      setCourses([]);
+>>>>>>> TempBranch
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+<<<<<<< HEAD
     fetchInstructorCourses();
   }, []);
 
@@ -51,10 +69,16 @@ export const useInstructorCourses = () => {
     }
   };
 
+=======
+    fetchCourses();
+  }, []);
+
+>>>>>>> TempBranch
   return {
     courses,
     loading,
     error,
+<<<<<<< HEAD
     refetch: fetchInstructorCourses,
     createCourse,
     updateCourse,
@@ -63,3 +87,8 @@ export const useInstructorCourses = () => {
 };
 
 export default useInstructorCourses;
+=======
+    refetch: fetchCourses
+  };
+};
+>>>>>>> TempBranch
