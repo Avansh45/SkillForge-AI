@@ -6,7 +6,7 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 30000,
+  timeout: 300000, // 5 minutes for AI generation (supports up to 100 questions)
 });
 
 apiClient.interceptors.request.use(

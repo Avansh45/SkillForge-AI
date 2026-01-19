@@ -1,15 +1,19 @@
 package com.skillforge.controller;
 
+import com.skillforge.dto.AiQuestionResponse;
 import com.skillforge.entity.Batch;
 import com.skillforge.entity.Course;
 import com.skillforge.entity.Exam;
 import com.skillforge.entity.ExamAttempt;
+import com.skillforge.entity.Question;
 import com.skillforge.entity.User;
 import com.skillforge.repository.BatchRepository;
 import com.skillforge.repository.CourseRepository;
 import com.skillforge.repository.ExamRepository;
 import com.skillforge.repository.ExamAttemptRepository;
+import com.skillforge.repository.QuestionRepository;
 import com.skillforge.repository.UserRepository;
+import com.skillforge.service.AiQuestionService;
 import com.skillforge.service.CourseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +27,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/instructors")
-@CrossOrigin(origins = "*")
 public class InstructorController {
 
     @Autowired
@@ -43,6 +46,12 @@ public class InstructorController {
 
     @Autowired
     private ExamAttemptRepository examAttemptRepository;
+
+    @Autowired
+    private QuestionRepository questionRepository;
+
+    @Autowired
+    private AiQuestionService aiQuestionService;
 
     @GetMapping("/me")
     public ResponseEntity<Map<String, Object>> getInstructorProfile(Authentication authentication) {
@@ -257,6 +266,97 @@ public class InstructorController {
 
         examRepository.delete(exam);
         return ResponseEntity.ok(Map.of("message", "Exam deleted successfully"));
+    }
+
+    /**
+     * Generate AI questions for preview (Instructor only)
+     * Can be called without an exam ID (examId=0) for preview
+     */
+    @PostMapping("/exams/{examId}/ai-generate-preview")
+    public ResponseEntity<Map<String, Object>> generateAIQuestionsPreview(
+            @PathVariable Long examId,
+            @RequestBody Map<String, Object> requestData,
+            Authentication authentication) {
+
+        String email = authentication.getName();
+        User instructor = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Instructor not found"));
+
+        // If examId is provided and not 0, verify ownership
+        if (examId != null && examId != 0) {
+            Exam exam = examRepository.findById(examId)
+                    .orElseThrow(() -> new RuntimeException("Exam not found"));
+
+            // Verify instructor owns the exam
+            if (!exam.getInstructor().getId().equals(instructor.getId())) {
+                throw new RuntimeException("You can only generate questions for your own exams");
+            }
+        }
+
+        // Extract parameters
+        String courseName = (String) requestData.get("courseName");
+        String topic = (String) requestData.get("topic");
+        String difficulty = (String) requestData.get("difficulty");
+        int numberOfQuestions = ((Number) requestData.get("numberOfQuestions")).intValue();
+
+        // Call AI service
+        AiQuestionResponse aiResponse = aiQuestionService.generateQuestions(
+                courseName, topic, difficulty, numberOfQuestions
+        );
+
+        // Return AI-generated questions
+        Map<String, Object> response = new HashMap<>();
+        response.put("questions", aiResponse.getQuestions());
+        response.put("courseName", aiResponse.getCourseName());
+        response.put("topic", aiResponse.getTopic());
+        response.put("difficulty", aiResponse.getDifficulty());
+        response.put("count", aiResponse.getCount());
+
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Generate and save AI questions to exam (Instructor only)
+     */
+    @PostMapping("/exams/{examId}/ai-generate-save")
+    public ResponseEntity<Map<String, Object>> generateAndSaveAIQuestions(
+            @PathVariable Long examId,
+            @RequestBody List<Map<String, Object>> questionsData,
+            Authentication authentication) {
+
+        String email = authentication.getName();
+        User instructor = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Instructor not found"));
+
+        Exam exam = examRepository.findById(examId)
+                .orElseThrow(() -> new RuntimeException("Exam not found"));
+
+        // Verify instructor owns the exam
+        if (!exam.getInstructor().getId().equals(instructor.getId())) {
+            throw new RuntimeException("You can only add questions to your own exams");
+        }
+
+        // Save each question
+        List<Question> savedQuestions = questionsData.stream().map(qData -> {
+            Question question = new Question();
+            question.setExam(exam);
+            question.setQuestionText((String) qData.get("question"));
+            question.setOptionA((String) qData.get("optionA"));
+            question.setOptionB((String) qData.get("optionB"));
+            question.setOptionC((String) qData.get("optionC"));
+            question.setOptionD((String) qData.get("optionD"));
+            question.setCorrectOption((String) qData.get("correctOption"));
+            question.setQuestionType("MCQ");
+            question.setMarks(1.0); // Default marks
+
+            return questionRepository.save(question);
+        }).collect(Collectors.toList());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Successfully saved " + savedQuestions.size() + " questions");
+        response.put("count", savedQuestions.size());
+
+        return ResponseEntity.ok(response);
     }
 }
 

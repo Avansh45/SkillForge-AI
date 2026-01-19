@@ -11,6 +11,7 @@ import Settings from './Settings';
 import CreateExamModal from '../components/CreateExamModal';
 import AddQuestionModal from '../components/AddQuestionModal';
 import ManageQuestionsModal from '../components/ManageQuestionsModal';
+import AIExamBuilder from '../components/AIExamBuilder';
 
 const InstructorDashboard = () => {
   const [activeSection, setActiveSection] = useState('overview');
@@ -591,6 +592,16 @@ const InstructorDashboard = () => {
                 )}
               </div>
             </div>
+
+            {/* AI Exam Builder Section */}
+            <AIExamBuilder 
+              exams={exams} 
+              onQuestionsAdded={(examId) => {
+                // Optionally refresh exam data or show success
+                console.log('Questions added to exam:', examId);
+                fetchExams(); // Refresh exam list
+              }}
+            />
 
             <div className="section-block" data-section="analytics">
               <h2 className="section-block-title">Class Performance Analytics</h2>

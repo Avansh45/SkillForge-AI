@@ -56,3 +56,23 @@ export const getExamQuestionsForStudent = async (examId) => {
   return await apiClient.get(`/questions/exam/${examId}/student`);
 };
 
+// AI Question Generation endpoints (for instructors)
+export const generateAIQuestions = async (requestData) => {
+  // requestData should contain: courseName, topic, difficulty, numberOfQuestions
+  const { courseName, topic, difficulty, numberOfQuestions } = requestData;
+  
+  // Return only the questions array for backward compatibility
+  const response = await apiClient.post('/instructors/exams/0/ai-generate-preview', {
+    courseName,
+    topic,
+    difficulty,
+    numberOfQuestions
+  });
+  
+  return { questions: response.questions };
+};
+
+export const saveAIQuestions = async (examId, questions) => {
+  return await apiClient.post(`/instructors/exams/${examId}/ai-generate-save`, questions);
+};
+

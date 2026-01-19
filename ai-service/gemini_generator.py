@@ -1,5 +1,7 @@
 import os
 import json
+import random
+import time
 from typing import List
 
 import requests
@@ -9,6 +11,9 @@ from models import MCQQuestion
 
 def _build_prompt(course: str, topic: str, difficulty: str, count: int) -> str:
     difficulty_str = f"Difficulty level: {difficulty} (align rigor and nuance accordingly)." if difficulty else ""
+    # Add randomization to ensure different questions each time
+    variation_seed = random.randint(1000, 9999)
+    timestamp_seed = int(time.time() * 1000) % 10000
     return f"""
 SYSTEM:
 Act as an expert assessment author who writes concise, scenario-led MCQs.
@@ -16,6 +21,7 @@ Output ONLY raw JSON (no markdown fences, no prose) matching the schema below.
 Enforce uniqueness: no repeated questions, no repeated phrasing patterns, no duplicated options within or across questions.
 Vary the correctOption positions across A/B/C/D; avoid clustering.
 Avoid generic wording and common textbook trivia; prefer realistic industry or real-world scenarios when relevant.
+IMPORTANT: Generate completely NEW and DIFFERENT questions each time. Variation seed: {variation_seed}{timestamp_seed}. Never reuse previous examples.
 
 TASK:
 Create exactly {count} unique multiple-choice questions for the course '{course}' on the topic '{topic}'.
@@ -279,7 +285,14 @@ def _parse_response(raw_text: str, expected_count: int) -> List[MCQQuestion]:
             skipped_count += 1
             continue
     
-    logger.info(f"Parsed {len(parsed)} valid questions, skipped {skipped_count}")
+    # Ensure we return exactly expected_count items when possible
+    if len(parsed) > expected_count:
+        import random as _rnd
+        _rnd.shuffle(parsed)
+        parsed = parsed[:expected_count]
+        logger.info(f"Parsed {len(parsed)} valid questions (trimmed to expected count), skipped {skipped_count}")
+    else:
+        logger.info(f"Parsed {len(parsed)} valid questions, skipped {skipped_count}")
     if len(parsed) == 0:
         raise ValueError("No valid questions could be parsed from AI response")
     
@@ -291,7 +304,8 @@ def generate_questions_gemini(course: str, topic: str, difficulty: str, count: i
     if not api_key:
         raise RuntimeError("Gemini API key not configured")
 
-    timeout = max(60, count * 2)
+    # Increase timeout for large question counts: up to 5 minutes (300s) for 100 questions
+    timeout = min(300, max(60, count * 3))
     prompt = _build_prompt(course, topic, difficulty, count)
     raw = _call_gemini(prompt, api_key, timeout=timeout)
     return _parse_response(raw, count)

@@ -5,6 +5,18 @@ import { useCourses, useStudentCourses } from '../hooks';
 import { enrollInCourse, unenrollFromCourse } from '../api/studentService';
 import { getCourseVideos } from '../api/videoService';
 import { getStudentExams } from '../api/examService';
+import { getCourseResources, downloadResource, openResourceInNewTab } from '../services/resourceService';
+import { getStudentAnalytics } from '../services/analyticsService';
+import {
+  getStudentAssignments,
+  submitAssignment,
+  getMySubmission,
+  validateAssignmentFile,
+  formatDueDate,
+  formatFileSize,
+  isAssignmentOverdue,
+  downloadSubmission
+} from '../services/assignmentService';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Settings from './Settings';
@@ -18,6 +30,22 @@ const StudentDashboard = () => {
   const [loadingVideos, setLoadingVideos] = useState(false);
   const [exams, setExams] = useState([]);
   const [loadingExams, setLoadingExams] = useState(false);
+  const [courseResources, setCourseResources] = useState({});
+  const [loadingResources, setLoadingResources] = useState({});
+  const [showResourcesFor, setShowResourcesFor] = useState({});
+  
+  // Assignment states
+  const [selectedCourseForAssignments, setSelectedCourseForAssignments] = useState(null);
+  const [courseAssignments, setCourseAssignments] = useState([]);
+  const [loadingAssignments, setLoadingAssignments] = useState(false);
+  const [submittingAssignment, setSubmittingAssignment] = useState(null);
+  const [assignmentFiles, setAssignmentFiles] = useState({});
+  
+  // Analytics states
+  const [analytics, setAnalytics] = useState(null);
+  const [loadingAnalytics, setLoadingAnalytics] = useState(true);
+  const [analyticsError, setAnalyticsError] = useState(null);
+  
   const navigate = useNavigate();
   const headerRef = useRef(null);
 
@@ -33,7 +61,27 @@ const StudentDashboard = () => {
 
   useEffect(() => {
     fetchExams();
+    fetchAnalytics();
   }, []);
+
+  const fetchAnalytics = async () => {
+    setLoadingAnalytics(true);
+    setAnalyticsError(null);
+    try {
+      const result = await getStudentAnalytics();
+      if (result.success) {
+        setAnalytics(result.data);
+      } else {
+        setAnalyticsError(result.error);
+        console.error('Failed to fetch analytics:', result.error);
+      }
+    } catch (err) {
+      setAnalyticsError(err.message || 'Failed to load analytics');
+      console.error('Error fetching analytics:', err);
+    } finally {
+      setLoadingAnalytics(false);
+    }
+  };
 
   const fetchExams = async () => {
     setLoadingExams(true);
@@ -95,6 +143,145 @@ const StudentDashboard = () => {
   const handleCloseVideos = () => {
     setSelectedCourse(null);
     setCourseVideos([]);
+  };
+
+  const handleToggleResources = async (courseId) => {
+    // Toggle visibility
+    setShowResourcesFor(prev => ({
+      ...prev,
+      [courseId]: !prev[courseId]
+    }));
+
+    // If opening and resources not loaded yet, fetch them
+    if (!showResourcesFor[courseId] && !courseResources[courseId]) {
+      await fetchCourseResources(courseId);
+    }
+  };
+
+  const fetchCourseResources = async (courseId) => {
+    setLoadingResources(prev => ({ ...prev, [courseId]: true }));
+    try {
+      const result = await getCourseResources(courseId);
+      if (result.success) {
+        setCourseResources(prev => ({
+          ...prev,
+          [courseId]: Array.isArray(result.data) ? result.data : []
+        }));
+      } else {
+        alert('❌ ' + (result.error || 'Failed to load resources'));
+        setCourseResources(prev => ({ ...prev, [courseId]: [] }));
+      }
+    } catch (err) {
+      console.error('Error fetching resources:', err);
+      alert('❌ Failed to load resources');
+      setCourseResources(prev => ({ ...prev, [courseId]: [] }));
+    } finally {
+      setLoadingResources(prev => ({ ...prev, [courseId]: false }));
+    }
+  };
+
+  const handleViewResource = async (resourceId) => {
+    try {
+      await openResourceInNewTab(resourceId);
+    } catch (err) {
+      alert('❌ ' + (err.message || 'Failed to open resource'));
+    }
+  };
+
+  const handleDownloadResource = async (resourceId, fileName) => {
+    try {
+      const result = await downloadResource(resourceId, fileName);
+      if (!result.success) {
+        alert('❌ ' + (result.error || 'Failed to download resource'));
+      }
+    } catch (err) {
+      alert('❌ ' + (err.message || 'Failed to download resource'));
+    }
+  };
+
+  // ==========================================
+  // ASSIGNMENT HANDLERS
+  // ==========================================
+
+  const handleViewAssignments = async (course) => {
+    setSelectedCourseForAssignments(course);
+    setLoadingAssignments(true);
+    try {
+      const result = await getStudentAssignments(course.id);
+      if (result.success) {
+        const assignments = Array.isArray(result.data) ? result.data : [];
+        setCourseAssignments(assignments);
+        // Backend already provides submission status for each assignment
+        // No need for separate API calls
+      } else {
+        alert('❌ ' + result.error);
+        setCourseAssignments([]);
+      }
+    } catch (err) {
+      console.error('Failed to fetch assignments:', err);
+      alert('❌ Failed to load assignments');
+      setCourseAssignments([]);
+    } finally {
+      setLoadingAssignments(false);
+    }
+  };
+
+  const handleFileSelect = (assignmentId, file) => {
+    const validation = validateAssignmentFile(file);
+    if (!validation.valid) {
+      alert('❌ ' + validation.error);
+      return;
+    }
+    setAssignmentFiles(prev => ({ ...prev, [assignmentId]: file }));
+  };
+
+  const handleSubmitAssignment = async (assignment) => {
+    const file = assignmentFiles[assignment.id];
+    if (!file) {
+      alert('❌ Please select a PDF file to submit');
+      return;
+    }
+
+    if (!confirm(`Submit assignment "${assignment.title}"? You can only submit once.`)) {
+      return;
+    }
+
+    setSubmittingAssignment(assignment.id);
+    try {
+      const result = await submitAssignment(assignment.id, file);
+      if (result.success) {
+        alert('✅ Assignment submitted successfully!');
+        // Clear file and refresh assignments
+        setAssignmentFiles(prev => ({ ...prev, [assignment.id]: null }));
+        await handleViewAssignments(selectedCourseForAssignments);
+      } else {
+        alert('❌ ' + result.error);
+      }
+    } catch (err) {
+      alert('❌ Failed to submit assignment. Please try again.');
+    } finally {
+      setSubmittingAssignment(null);
+    }
+  };
+
+  const handleCloseAssignments = () => {
+    setSelectedCourseForAssignments(null);
+    setCourseAssignments([]);
+    setAssignmentFiles({});
+  };
+
+  const formatFileSize = (bytes) => {
+    if (!bytes) return 'N/A';
+    const kb = bytes / 1024;
+    const mb = kb / 1024;
+    if (mb >= 1) return `${mb.toFixed(2)} MB`;
+    return `${kb.toFixed(2)} KB`;
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
   const getEmbedUrl = (url, videoType) => {
@@ -186,65 +373,191 @@ const StudentDashboard = () => {
               <div className="grid">
                 <div>
                   <div className="card">
-                    <h2>Learning Overview</h2>
-                    <p className="card-sub">Quick view of your current courses and their progress.</p>
-                    <span className="tag">Active Courses</span>
-                    {loadingEnrollments ? (
-                      <div style={{ padding: '1rem' }}>Loading your courses...</div>
-                    ) : enrolledCourses.length === 0 ? (
-                      <div style={{ padding: '1rem', color: '#666' }}>
-                        No enrolled courses yet. Browse available courses below and enroll to get started!
+                    <h2>📊 Performance Analytics</h2>
+                    <p className="card-sub">Your learning progress and achievements</p>
+                    {loadingAnalytics ? (
+                      <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                        <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>⏳</div>
+                        Loading analytics...
+                      </div>
+                    ) : analyticsError ? (
+                      <div style={{ padding: '1.5rem', background: '#fee2e2', borderRadius: '8px', color: '#dc2626' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                          <span style={{ fontSize: '1.25rem' }}>⚠️</span>
+                          <strong>Error Loading Analytics</strong>
+                        </div>
+                        <p style={{ margin: 0, fontSize: '0.875rem' }}>{analyticsError}</p>
                       </div>
                     ) : (
-                      <ul className="list">
-                        {enrolledCourses.slice(0, 5).map((enrollment) => (
-                          <li key={enrollment.id}>
-                            <span>{enrollment.course?.title || 'Unknown Course'}</span>
-                            <span className="label">{enrollment.progressPercentage || 0}% complete</span>
-                          </li>
-                        ))}
-                      </ul>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        {/* Stat Cards Row */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+                          <div style={{ padding: '1rem', background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)', borderRadius: '12px', color: 'white', textAlign: 'center' }}>
+                            <div style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.25rem' }}>
+                              {analytics?.courses?.totalEnrolled || 0}
+                            </div>
+                            <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>Active Courses</div>
+                          </div>
+                          <div style={{ padding: '1rem', background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)', borderRadius: '12px', color: 'white', textAlign: 'center' }}>
+                            <div style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.25rem' }}>
+                              {analytics?.exams?.totalAttempts || 0}
+                            </div>
+                            <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>Exams Taken</div>
+                          </div>
+                          <div style={{ padding: '1rem', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', borderRadius: '12px', color: 'white', textAlign: 'center' }}>
+                            <div style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '0.25rem' }}>
+                              {analytics?.assignments?.totalSubmitted || 0}
+                            </div>
+                            <div style={{ fontSize: '0.875rem', opacity: 0.9 }}>Assignments</div>
+                          </div>
+                        </div>
+
+                        {/* Overall Progress */}
+                        <div style={{ padding: '1.5rem', background: '#f8f9fa', borderRadius: '12px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                            <div>
+                              <h4 style={{ margin: 0, fontSize: '1.1rem' }}>Overall Progress</h4>
+                              <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.875rem', color: '#666' }}>Across all enrolled courses</p>
+                            </div>
+                            <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#16a34a' }}>
+                              {analytics?.overallProgress?.overallProgressPercentage?.toFixed(1) || '0'}%
+                            </div>
+                          </div>
+                          <div style={{ width: '100%', height: '12px', background: '#e0e0e0', borderRadius: '6px', overflow: 'hidden' }}>
+                            <div style={{ width: `${analytics?.overallProgress?.overallProgressPercentage || 0}%`, height: '100%', background: 'linear-gradient(90deg, #16a34a 0%, #15803d 100%)', transition: 'width 0.5s ease' }} />
+                          </div>
+                        </div>
+
+                        {/* Exam Performance */}
+                        <div style={{ padding: '1.5rem', background: '#f0f9ff', borderRadius: '12px', border: '1px solid #bfdbfe' }}>
+                          <h4 style={{ margin: '0 0 1rem 0', fontSize: '1rem', color: '#1e40af' }}>🎯 Exam Performance</h4>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+                            <div>
+                              <div style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.5rem' }}>Average Score</div>
+                              <div style={{ fontSize: '1.75rem', fontWeight: 'bold', color: (analytics?.exams?.averagePercentage || 0) >= 70 ? '#16a34a' : (analytics?.exams?.averagePercentage || 0) >= 50 ? '#f59e0b' : '#dc2626' }}>
+                                {analytics?.exams?.averagePercentage?.toFixed(1) || '0'}%
+                              </div>
+                              <div style={{ width: '100%', height: '6px', background: '#e0e0e0', borderRadius: '3px', overflow: 'hidden', marginTop: '0.5rem' }}>
+                                <div style={{ width: `${analytics?.exams?.averagePercentage || 0}%`, height: '100%', background: (analytics?.exams?.averagePercentage || 0) >= 70 ? '#16a34a' : (analytics?.exams?.averagePercentage || 0) >= 50 ? '#f59e0b' : '#dc2626', transition: 'width 0.5s ease' }} />
+                              </div>
+                            </div>
+                            <div>
+                              <div style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.5rem' }}>Completion Rate</div>
+                              <div style={{ fontSize: '1.75rem', fontWeight: 'bold', color: '#3b82f6' }}>
+                                {analytics?.exams?.uniqueExamsAttempted || 0}
+                              </div>
+                              <div style={{ width: '100%', height: '6px', background: '#e0e0e0', borderRadius: '3px', overflow: 'hidden', marginTop: '0.5rem' }}>
+                                <div style={{ width: `${Math.min((analytics?.exams?.uniqueExamsAttempted || 0) * 10, 100)}%`, height: '100%', background: '#3b82f6', transition: 'width 0.5s ease' }} />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Assignment Stats */}
+                        <div style={{ padding: '1.5rem', background: '#fef3c7', borderRadius: '12px', border: '1px solid #fde68a' }}>
+                          <h4 style={{ margin: '0 0 1rem 0', fontSize: '1rem', color: '#92400e' }}>📝 Assignment Progress</h4>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+                            <div>
+                              <div style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.25rem' }}>Submitted</div>
+                              <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#16a34a' }}>
+                                {analytics?.assignments?.totalSubmitted || 0} / {analytics?.assignments?.graded || 0}
+                              </div>
+                            </div>
+                            <div>
+                              <div style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.25rem' }}>Average Score</div>
+                              <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#f59e0b' }}>
+                                {analytics?.assignments?.averageGradePercentage?.toFixed(1) || '0'}%
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     )}
-                    <div className="stat-row">
-                      <div className="stat-pill">
-                        <strong>{enrolledCourses.length}</strong>
-                        Active courses
-                      </div>
-                      <div className="stat-pill">
-                        <strong>{allCourses.length}</strong>
-                        Available courses
-                      </div>
-                      <div className="stat-pill">
-                        <strong>--</strong>
-                        Overall progress
-                      </div>
-                    </div>
                   </div>
                 </div>
 
                 <div>
                   <div className="card">
-                    <h3>Today's Focus</h3>
-                    <p className="card-sub">Continue learning from your enrolled courses.</p>
-                    {enrolledCourses.length === 0 ? (
-                      <div style={{ padding: '1rem', color: '#666' }}>
-                        Enroll in courses to see personalized recommendations here.
+                    <h3>📚 Active Courses</h3>
+                    <p className="card-sub">Your enrolled courses and progress</p>
+                    {loadingAnalytics ? (
+                      <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                        <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>⏳</div>
+                        Loading courses...
+                      </div>
+                    ) : !analytics?.courses?.coursesList || analytics.courses.coursesList.length === 0 ? (
+                      <div style={{ padding: '2rem', textAlign: 'center', color: '#666', background: '#f8f9fa', borderRadius: '8px' }}>
+                        <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📖</div>
+                        <p style={{ margin: 0, fontWeight: '500' }}>No courses yet</p>
+                        <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem' }}>Enroll in courses to start learning</p>
                       </div>
                     ) : (
-                      <ul className="list">
-                        {enrolledCourses.slice(0, 3).map((enrollment) => (
-                          <li key={enrollment.id}>
-                            <span>Continue: {enrollment.course?.title}</span>
-                            <span className="label">Progress: {enrollment.progressPercentage || 0}%</span>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '500px', overflowY: 'auto' }}>
+                        {analytics.courses.coursesList.map((course) => (
+                          <div key={course.courseId} style={{ padding: '1rem', background: '#f8f9fa', borderRadius: '8px', border: '1px solid #e0e0e0' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontWeight: '600', marginBottom: '0.25rem' }}>{course.courseTitle}</div>
+                                <div style={{ fontSize: '0.75rem', color: '#666' }}>
+                                  {course.videosCount || 0} videos · {course.assignmentsCount || 0} assignments
+                                </div>
+                              </div>
+                              <div style={{ textAlign: 'right' }}>
+                                <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#16a34a' }}>
+                                  {course.progressPercentage?.toFixed(0) || 0}%
+                                </div>
+                              </div>
+                            </div>
+                            <div style={{ width: '100%', height: '8px', background: '#e0e0e0', borderRadius: '4px', overflow: 'hidden' }}>
+                              <div style={{ width: `${course.progressPercentage || 0}%`, height: '100%', background: 'linear-gradient(90deg, #16a34a 0%, #15803d 100%)', transition: 'width 0.5s ease' }} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="card" style={{ marginTop: '1rem' }}>
+                    <h3>🎯 Recent Activity</h3>
+                    <p className="card-sub">Your latest learning activities</p>
+                    {loadingAnalytics ? (
+                      <div style={{ padding: '1.5rem', textAlign: 'center', color: '#666' }}>
+                        Loading activity...
+                      </div>
+                    ) : !analytics?.exams?.recentAttempts || analytics.exams.recentAttempts.length === 0 ? (
+                      <div style={{ padding: '2rem', textAlign: 'center', color: '#666', background: '#f8f9fa', borderRadius: '8px' }}>
+                        <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📋</div>
+                        <p style={{ margin: 0, fontSize: '0.875rem' }}>No recent activity</p>
+                      </div>
+                    ) : (
+                      <ul className="list" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                        {analytics.exams.recentAttempts.slice(0, 5).map((activity, index) => (
+                          <li key={index} style={{ alignItems: 'flex-start', padding: '0.75rem', borderBottom: index < 4 ? '1px solid #f0f0f0' : 'none' }}>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                                <span style={{ fontSize: '1.25rem' }}>📝</span>
+                                <strong style={{ fontSize: '0.9rem' }}>{activity.examTitle}</strong>
+                              </div>
+                              <div style={{ fontSize: '0.75rem', color: '#666', marginLeft: '1.75rem' }}>
+                                {activity.courseTitle} · {new Date(activity.attemptDate).toLocaleDateString()}
+                              </div>
+                            </div>
+                            {activity.score !== undefined && (
+                              <div style={{ 
+                                padding: '0.25rem 0.75rem',
+                                borderRadius: '12px',
+                                fontSize: '0.875rem',
+                                fontWeight: '600',
+                                background: activity.score >= 70 ? '#dcfce7' : activity.score >= 50 ? '#fef3c7' : '#fee2e2',
+                                color: activity.score >= 70 ? '#166534' : activity.score >= 50 ? '#92400e' : '#991b1b'
+                              }}>
+                                {activity.score}%
+                              </div>
+                            )}
                           </li>
                         ))}
                       </ul>
                     )}
-                    <div className="chip-row">
-                      <span className="chip">Adaptive practice</span>
-                      <span className="chip">Weak topic focus</span>
-                      <span className="chip">Time-bound tasks</span>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -274,39 +587,126 @@ const StudentDashboard = () => {
                         <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem' }}>Browse available courses on the right to get started!</p>
                       </div>
                     ) : (
-                      <ul className="list">
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         {enrolledCourses.map((enrollment) => (
-                          <li key={enrollment.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div>
-                              <span style={{ fontWeight: '500' }}>{enrollment.course?.title || 'Unknown Course'}</span>
-                              {enrollment.course?.description && (
-                                <span className="label" style={{ display: 'block', marginTop: '0.25rem', fontSize: '0.875rem' }}>
-                                  {enrollment.course.description}
+                          <div key={enrollment.id} className="card" style={{ padding: '1rem', background: '#f8f9fa' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                              <div>
+                                <span style={{ fontWeight: '500', fontSize: '1.1rem' }}>{enrollment.course?.title || 'Unknown Course'}</span>
+                                {enrollment.course?.description && (
+                                  <span className="label" style={{ display: 'block', marginTop: '0.25rem', fontSize: '0.875rem' }}>
+                                    {enrollment.course.description}
+                                  </span>
+                                )}
+                                <span className="label" style={{ display: 'block', marginTop: '0.25rem' }}>
+                                  Progress: {enrollment.progressPercentage || 0}%
                                 </span>
+                              </div>
+                              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <button 
+                                  className="btn btn-primary" 
+                                  style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem' }}
+                                  onClick={() => handleViewVideos(enrollment.course)}
+                                >
+                                  View Videos
+                                </button>
+                                <button 
+                                  className="btn btn-info" 
+                                  style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem' }}
+                                  onClick={() => handleViewAssignments(enrollment.course)}
+                                >
+                                  📝 Assignments
+                                </button>
+                                <button 
+                                  className="btn btn-outline" 
+                                  style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem', color: '#d32f2f', borderColor: '#d32f2f' }}
+                                  onClick={() => handleUnenroll(enrollment.course?.id)}
+                                >
+                                  Unenroll
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Course Resources Section */}
+                            <div style={{ borderTop: '1px solid #ddd', paddingTop: '0.75rem' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                <h4 style={{ margin: 0, fontSize: '0.95rem', color: '#555' }}>📄 Course Resources</h4>
+                                <button
+                                  className="btn btn-outline"
+                                  style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                                  onClick={() => handleToggleResources(enrollment.course?.id)}
+                                >
+                                  {showResourcesFor[enrollment.course?.id] ? 'Hide' : 'Show'}
+                                </button>
+                              </div>
+
+                              {showResourcesFor[enrollment.course?.id] && (
+                                <div style={{ marginTop: '0.5rem' }}>
+                                  {loadingResources[enrollment.course?.id] ? (
+                                    <div style={{ padding: '1rem', textAlign: 'center', color: '#666' }}>
+                                      <div style={{ fontSize: '1rem', marginBottom: '0.25rem' }}>⏳</div>
+                                      Loading resources...
+                                    </div>
+                                  ) : !courseResources[enrollment.course?.id] || courseResources[enrollment.course?.id].length === 0 ? (
+                                    <div style={{ padding: '1rem', textAlign: 'center', color: '#666', background: '#fff', borderRadius: '6px' }}>
+                                      <div style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>📭</div>
+                                      <p style={{ margin: 0, fontSize: '0.875rem' }}>No resources available yet</p>
+                                    </div>
+                                  ) : (
+                                    <div style={{ background: '#fff', borderRadius: '6px', overflow: 'hidden' }}>
+                                      <table style={{ width: '100%', fontSize: '0.875rem' }}>
+                                        <thead>
+                                          <tr style={{ background: '#f0f0f0', borderBottom: '1px solid #ddd' }}>
+                                            <th style={{ padding: '0.5rem', textAlign: 'left' }}>File Name</th>
+                                            <th style={{ padding: '0.5rem', textAlign: 'left' }}>Size</th>
+                                            <th style={{ padding: '0.5rem', textAlign: 'left' }}>Uploaded</th>
+                                            <th style={{ padding: '0.5rem', textAlign: 'center' }}>Actions</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          {courseResources[enrollment.course?.id].map((resource) => (
+                                            <tr key={resource.id} style={{ borderBottom: '1px solid #eee' }}>
+                                              <td style={{ padding: '0.5rem' }}>
+                                                <div style={{ fontWeight: '500' }}>{resource.title}</div>
+                                              </td>
+                                              <td style={{ padding: '0.5rem', color: '#666' }}>
+                                                {formatFileSize(resource.fileSize)}
+                                              </td>
+                                              <td style={{ padding: '0.5rem', color: '#666' }}>
+                                                {formatDate(resource.createdAt)}
+                                              </td>
+                                              <td style={{ padding: '0.5rem', textAlign: 'center' }}>
+                                                <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                                                  <button
+                                                    className="btn btn-primary"
+                                                    style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                                                    onClick={() => handleViewResource(resource.id)}
+                                                    title="View PDF in new tab"
+                                                  >
+                                                    View
+                                                  </button>
+                                                  <button
+                                                    className="btn btn-outline"
+                                                    style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+                                                    onClick={() => handleDownloadResource(resource.id, resource.title)}
+                                                    title="Download PDF"
+                                                  >
+                                                    Download
+                                                  </button>
+                                                </div>
+                                              </td>
+                                            </tr>
+                                          ))}
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  )}
+                                </div>
                               )}
-                              <span className="label" style={{ display: 'block', marginTop: '0.25rem' }}>
-                                Progress: {enrollment.progressPercentage || 0}%
-                              </span>
                             </div>
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                              <button 
-                                className="btn btn-primary" 
-                                style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem' }}
-                                onClick={() => handleViewVideos(enrollment.course)}
-                              >
-                                View Videos
-                              </button>
-                              <button 
-                                className="btn btn-outline" 
-                                style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem', color: '#d32f2f', borderColor: '#d32f2f' }}
-                                onClick={() => handleUnenroll(enrollment.course?.id)}
-                              >
-                                Unenroll
-                              </button>
-                            </div>
-                          </li>
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -633,6 +1033,83 @@ const StudentDashboard = () => {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {selectedCourseForAssignments && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: '1rem' }}>
+          <div style={{ background: '#fff', borderRadius: '12px', padding: '2rem', width: '90%', maxWidth: '1000px', maxHeight: '90vh', overflow: 'auto', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h3 style={{ margin: 0, color: '#333' }}>📝 Assignments - {selectedCourseForAssignments.title}</h3>
+              <button onClick={handleCloseAssignments} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#666' }}>×</button>
+            </div>
+
+            {loadingAssignments ? (
+              <div style={{ textAlign: 'center', padding: '2rem' }}>
+                <div className="spinner-border" role="status"><span className="visually-hidden">Loading...</span></div>
+                <p style={{ marginTop: '1rem', color: '#666' }}>Loading assignments...</p>
+              </div>
+            ) : courseAssignments.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '2rem', color: '#666' }}><p>📭 No assignments available for this course yet.</p></div>
+            ) : (
+              <div style={{ display: 'grid', gap: '1.5rem' }}>
+                {courseAssignments.map(assignment => {
+                  // Backend provides all submission data in assignment object
+                  const isSubmitted = assignment.submitted === true;
+                  const isOverdue = isAssignmentOverdue(assignment.dueDate);
+                  const selectedFile = assignmentFiles[assignment.id];
+                  return (
+                    <div key={assignment.id} style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '1.5rem', background: isSubmitted ? '#f0f9ff' : '#fff' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                        <div style={{ flex: 1 }}>
+                          <h4 style={{ margin: '0 0 0.5rem 0', color: '#333' }}>{assignment.title}</h4>
+                          <div style={{ fontSize: '0.875rem', color: '#666', display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                            <span>📅 Due: {formatDueDate(assignment.dueDate)}</span>
+                            <span>💯 Max Marks: {assignment.maxMarks}</span>
+                            {isOverdue && !isSubmitted && <span style={{ color: '#d32f2f', fontWeight: 'bold' }}>⏰ Overdue</span>}
+                          </div>
+                        </div>
+                        <div style={{ padding: '0.25rem 0.75rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 'bold', background: isSubmitted ? (assignment.graded ? '#4caf50' : '#ff9800') : (isOverdue ? '#d32f2f' : '#2196f3'), color: '#fff' }}>
+                          {isSubmitted ? (assignment.graded ? '✅ GRADED' : '📝 SUBMITTED') : (isOverdue ? '⏰ OVERDUE' : '⏳ PENDING')}
+                        </div>
+                      </div>
+                      <p style={{ margin: '0 0 1rem 0', color: '#555', fontSize: '0.95rem' }}>{assignment.description}</p>
+                      {!isSubmitted && (
+                        <div style={{ borderTop: '1px solid #ddd', paddingTop: '1rem' }}>
+                          <h5 style={{ margin: '0 0 0.75rem 0', fontSize: '0.95rem', color: '#555' }}>📤 Submit Your Work</h5>
+                          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+                            <div style={{ flex: '1', minWidth: '200px' }}>
+                              <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem', color: '#666' }}>Select PDF File (Max 5MB)</label>
+                              <input type="file" accept=".pdf" onChange={(e) => handleFileSelect(assignment.id, e.target.files[0])} style={{ display: 'block', width: '100%', padding: '0.5rem', border: '1px solid #ddd', borderRadius: '4px', fontSize: '0.875rem' }} disabled={submittingAssignment === assignment.id || isOverdue} />
+                              {selectedFile && <div style={{ marginTop: '0.25rem', fontSize: '0.75rem', color: '#666' }}>✓ {selectedFile.name} ({formatFileSize(selectedFile.size)})</div>}
+                            </div>
+                            <button className="btn btn-primary" onClick={() => handleSubmitAssignment(assignment)} disabled={!selectedFile || submittingAssignment === assignment.id || isOverdue} style={{ padding: '0.5rem 1.5rem', opacity: (!selectedFile || submittingAssignment === assignment.id || isOverdue) ? 0.5 : 1 }}>{submittingAssignment === assignment.id ? '📤 Submitting...' : '📤 Submit'}</button>
+                          </div>
+                          {isOverdue && <div style={{ marginTop: '0.75rem', padding: '0.75rem', background: '#ffebee', borderRadius: '4px', fontSize: '0.875rem', color: '#d32f2f' }}>⚠️ This assignment is overdue. Submissions are no longer accepted.</div>}
+                        </div>
+                      )}
+                      {isSubmitted && (
+                        <div style={{ borderTop: '1px solid #ddd', paddingTop: '1rem' }}>
+                          <h5 style={{ margin: '0 0 0.75rem 0', fontSize: '0.95rem', color: '#555' }}>📋 Your Submission</h5>
+                          <div style={{ display: 'grid', gap: '0.5rem', fontSize: '0.875rem' }}>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}><strong>Submitted:</strong><span>{new Date(assignment.submittedAt).toLocaleString()}</span></div>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}><strong>File:</strong><a href="#" onClick={async (e) => { e.preventDefault(); const result = await downloadSubmission(assignment.submissionId, assignment.fileName); if (!result.success) alert('❌ ' + result.error); }} style={{ color: '#2196f3', textDecoration: 'underline' }}>{assignment.fileName} ⬇</a></div>
+                            {assignment.graded && (
+                              <>
+                                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}><strong>Marks:</strong><span style={{ color: '#4caf50', fontWeight: 'bold', fontSize: '1rem' }}>{assignment.marksAwarded} / {assignment.maxMarks}</span></div>
+                                {assignment.feedback && <div style={{ marginTop: '0.5rem' }}><strong>Feedback:</strong><div style={{ marginTop: '0.25rem', padding: '0.75rem', background: '#f5f5f5', borderRadius: '4px', whiteSpace: 'pre-wrap' }}>{assignment.feedback}</div></div>}
+                              </>
+                            )}
+                            {!assignment.graded && <div style={{ marginTop: '0.5rem', padding: '0.75rem', background: '#fff3e0', borderRadius: '4px', color: '#f57c00' }}>⏳ Your submission is pending review by the instructor.</div>}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}

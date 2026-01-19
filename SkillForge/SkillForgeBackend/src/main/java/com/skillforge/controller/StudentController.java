@@ -156,7 +156,12 @@ public class StudentController {
                     if (!examAttempts.isEmpty()) {
                         ExamAttempt latestAttempt = examAttempts.get(0);
                         data.put("latestScore", latestAttempt.getScore());
+                        data.put("score", latestAttempt.getScore()); // For compatibility
+                        data.put("percentage", latestAttempt.getScore()); // For compatibility
+                        data.put("submittedAt", latestAttempt.getAttemptedAt());
+                        data.put("updatedAt", latestAttempt.getAttemptedAt());
                         data.put("latestAttemptDate", latestAttempt.getAttemptedAt());
+                        data.put("status", "COMPLETED");
                     }
 
                     return data;

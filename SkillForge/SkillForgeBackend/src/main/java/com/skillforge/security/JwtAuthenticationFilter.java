@@ -26,6 +26,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         final String authorizationHeader = request.getHeader("Authorization");
+        final String requestURI = request.getRequestURI();
+        final String method = request.getMethod();
+
+        System.out.println("\n=== JWT FILTER START ===");
+        System.out.println("Request: " + method + " " + requestURI);
+        System.out.println("Authorization Header Present: " + (authorizationHeader != null));
 
         String email = null;
         String jwt = null;
@@ -36,31 +42,35 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 email = jwtUtil.getEmailFromToken(jwt);
                 role = jwtUtil.getRoleFromToken(jwt);
-                System.out.println("=== JWT DEBUG ===");
-                System.out.println("Request URI: " + request.getRequestURI());
-                System.out.println("Email from token: " + email);
-                System.out.println("Role from token: " + role);
-                System.out.println("Authority being set: ROLE_" + role);
-                System.out.println("================");
+                System.out.println("✓ Token parsed successfully");
+                System.out.println("  Email: " + email);
+                System.out.println("  Role: " + role);
+                System.out.println("  Authority to set: ROLE_" + role);
             } catch (Exception e) {
-                System.out.println("=== JWT ERROR ===");
-                System.out.println("Error parsing token: " + e.getMessage());
-                System.out.println("================");
+                System.out.println("✗ Error parsing token: " + e.getMessage());
+                e.printStackTrace();
             }
+        } else {
+            System.out.println("✗ No Bearer token found");
         }
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            System.out.println("Validating token for email: " + email);
             if (jwtUtil.validateToken(jwt, email)) {
+                System.out.println("✓ Token validation SUCCESS");
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         email, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role)));
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
-                System.out.println("=== AUTH SUCCESS ===");
-                System.out.println("Authentication set for: " + email);
-                System.out.println("Authorities: " + authToken.getAuthorities());
-                System.out.println("===================");
+                System.out.println("✓ Authentication set: " + email);
+                System.out.println("  Authorities: " + authToken.getAuthorities());
+            } else {
+                System.out.println("✗ Token validation FAILED");
             }
+        } else {
+            System.out.println("Skipping auth setup - email=" + email + ", existing-auth=" + (SecurityContextHolder.getContext().getAuthentication() != null));
         }
+        System.out.println("=== JWT FILTER END ===\n");
         chain.doFilter(request, response);
     }
 }

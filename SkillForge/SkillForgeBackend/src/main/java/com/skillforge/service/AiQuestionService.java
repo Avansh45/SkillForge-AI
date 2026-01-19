@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +36,11 @@ public class AiQuestionService {
     private final RestTemplate restTemplate;
 
     public AiQuestionService() {
-        this.restTemplate = new RestTemplate();
+        // Configure RestTemplate with increased timeouts for AI service
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(10000); // 10 seconds to connect
+        factory.setReadTimeout(300000);   // 5 minutes to read response (supports up to 100 questions)
+        this.restTemplate = new RestTemplate(factory);
     }
 
     private void logRequest(String url, AiQuestionRequest request) {

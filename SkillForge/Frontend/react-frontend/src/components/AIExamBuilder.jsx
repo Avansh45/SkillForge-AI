@@ -46,6 +46,12 @@ const AIExamBuilder = ({ exams, onQuestionsAdded }) => {
     setSuccess('');
     setPreviewQuestions(null);
 
+    // Clamp slider value to 1..100 to ensure backend gets the exact requested count
+    const clampedCount = Math.min(100, Math.max(1, Number(numberOfQuestions) || 1));
+    if (clampedCount !== numberOfQuestions) {
+      setNumberOfQuestions(clampedCount);
+    }
+
     // Validation
     if (!selectedExamId) {
       setError('⚠️ Please select an exam');
@@ -68,7 +74,7 @@ const AIExamBuilder = ({ exams, onQuestionsAdded }) => {
         courseName: courseName.trim(),
         topic: topic.trim(),
         difficulty,
-        numberOfQuestions
+        numberOfQuestions: clampedCount
       });
 
       // Display preview
