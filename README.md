@@ -1,7 +1,308 @@
+# SkillForge: Full-Stack Adaptive Learning Platform
 
-<<<<<<< HEAD
+SkillForge is a **full-stack, role-based learning and examination platform** built using **React (Frontend)**, **Spring Boot (Backend)**, and **Python FastAPI with AI (AI Service)**. The platform supports Students, Instructors, and Admins with secure authentication, authorization, dashboards, and intelligent question generation.
 
-<h1>SkillForge: Full-Stack Adaptive Learning Platform (React + Spring Boot)</h1>
+---
+
+## 📁 Project Architecture
+
+```
+SkillForge-AI/
+│
+├── SkillForge/
+│   ├── Frontend/
+│   │   └── react-frontend/          (React + Vite SPA)
+│   │       ├── src/
+│   │       │   ├── components/      (Reusable UI components)
+│   │       │   ├── pages/           (Role-based dashboards)
+│   │       │   ├── services/        (API communication)
+│   │       │   ├── hooks/           (Custom React hooks)
+│   │       │   └── utils/           (Helpers & authentication)
+│   │       └── package.json
+│   │
+│   └── SkillForgeBackend/           (Spring Boot REST API)
+│       ├── src/main/java/
+│       │   ├── controller/          (REST endpoints)
+│       │   ├── service/             (Business logic)
+│       │   ├── repository/          (Database operations)
+│       │   ├── entity/              (JPA entities)
+│       │   └── security/            (JWT & authentication)
+│       └── pom.xml
+│
+└── ai-service/                      (Python FastAPI)
+    ├── main.py                      (FastAPI server)
+    ├── gemini_generator.py          (AI question generation)
+    ├── models.py                    (Request/Response schemas)
+    ├── requirements.txt
+    └── .env                         (Configuration)
+```
+
+---
+
+## 🎯 Key Features
+
+### Frontend (React + Vite)
+- **Role-Based Dashboards**: Separate interfaces for Students, Instructors, and Admins
+- **Course Management**: View, enroll, and manage courses
+- **Exam System**: Take exams with AI-generated questions
+- **Video Streaming**: Watch course videos
+- **Real-time Updates**: Live notifications and performance tracking
+- **Responsive Design**: Mobile-friendly UI
+
+### Backend (Spring Boot)
+- **REST APIs**: 75+ comprehensive endpoints for all operations
+- **JWT Authentication**: Secure token-based authentication
+- **Role-Based Authorization**: STUDENT, INSTRUCTOR, ADMIN roles
+- **MySQL Database**: Persistent data storage with JPA/Hibernate
+- **Performance Analytics**: Student progress tracking and reporting
+- **API Security**: CORS configuration and input validation
+- **Assignments & Resources**: Full content management system
+
+### AI Service (Python FastAPI)
+- **Intelligent Question Generation**: Uses Google Gemini 2.5 Flash
+- **Rate Limiting**: 6 requests per 60 seconds with exponential backoff
+- **Question Customization**: Generate 1-100 questions per request
+- **Real-time Integration**: Direct integration with backend
+- **Error Recovery**: JSON recovery for truncated API responses
+
+---
+
+## 🔐 Authentication & Authorization
+
+### Authentication
+- **JWT-Based**: Users receive tokens upon login valid for 24 hours
+- **Token Format**: Includes email, role, and expiration
+- **Header**: `Authorization: Bearer <JWT_TOKEN>`
+
+### User Roles
+| Role | Permissions |
+|------|------------|
+| **STUDENT** | Enroll courses, take exams, watch videos, submit assignments |
+| **INSTRUCTOR** | Create courses, upload videos, manage exams, grade submissions |
+| **ADMIN** | Manage all users, courses, analytics, and platform settings |
+
+---
+
+## 💾 Database Schema
+
+**Database Name**: `skillforge_db`
+
+### Core Tables (12+)
+| Table | Purpose |
+|-------|---------|
+| `users` | User profiles with roles and authentication |
+| `courses` | Course information and metadata |
+| `enrollments` | Student course enrollment records |
+| `videos` | Course video resources |
+| `exams` | Exam configurations |
+| `questions` | Exam questions (manual or AI-generated) |
+| `exam_attempts` | Student exam submissions |
+| `exam_answers` | Individual question answers |
+| `assignments` | Assignment configurations |
+| `assignment_submissions` | Student submission records |
+| `course_resources` | Study materials and PDFs |
+| `batches` | Course batch management |
+
+---
+
+## 🛠 Technology Stack
+
+### Frontend
+- React 19.2
+- Vite 7.2
+- React Router DOM 7.10
+- Axios 1.13.2
+- ESLint 9.39
+
+### Backend
+- Java 17
+- Spring Boot 3.2.0
+- Spring Security
+- JJWT 0.12.3 (JWT)
+- Hibernate/JPA
+- MySQL 8.0
+- Maven 3.x
+
+### AI Service
+- Python 3.12
+- FastAPI 0.109
+- Uvicorn 0.27
+- Google Generative AI SDK
+- Pydantic 2.5
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- **Java 17** (for Backend)
+- **Node.js 18+** (for Frontend)
+- **Python 3.12** (for AI Service)
+- **MySQL 8.0** (Database)
+
+### Quick Setup
+
+#### 1. Backend Setup
+```bash
+cd SkillForge/SkillForgeBackend
+mvn clean install
+mvn spring-boot:run
+# Backend runs on http://localhost:8080
+```
+
+#### 2. Frontend Setup
+```bash
+cd SkillForge/Frontend/react-frontend
+npm install
+npm run dev
+# Frontend runs on http://localhost:5173
+```
+
+#### 3. AI Service Setup
+```bash
+cd ai-service
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+python main.py
+# AI Service runs on http://localhost:8000
+```
+
+---
+
+## 📚 API Endpoints
+
+### Authentication
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - Login user
+- `POST /api/auth/change-password` - Change password
+
+### Courses
+- `GET /api/courses` - List all courses (public)
+- `GET /api/courses/:id` - Get course details
+- `POST /api/courses` - Create course (INSTRUCTOR)
+- `POST /api/enrollments` - Enroll in course (STUDENT)
+
+### Exams
+- `GET /api/exams` - List exams
+- `POST /api/exams` - Create exam (INSTRUCTOR)
+- `POST /api/exam-submissions` - Submit exam answers (STUDENT)
+- `GET /api/exam-submissions/:id` - Get submission results
+
+### AI Generation
+- `POST /api/questions/generate` - Generate questions using AI
+- `GET /api/questions/exam/:examId` - Get exam questions
+
+### Analytics
+- `GET /api/analytics/student/:studentId` - Student performance metrics
+- `GET /api/analytics/course/:courseId` - Course analytics (INSTRUCTOR)
+
+---
+
+## 📊 Database Configuration
+
+Update `SkillForge/SkillForgeBackend/src/main/resources/application.properties`:
+
+```properties
+# MySQL Configuration
+spring.datasource.url=jdbc:mysql://localhost:3306/skillforge_db?createDatabaseIfNotExists=true
+spring.datasource.username=root
+spring.datasource.password=YOUR_PASSWORD
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+# JPA/Hibernate
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=false
+
+# JWT Configuration
+jwt.secret.key=YOUR_SECRET_KEY
+jwt.expiration=86400000
+
+# Server Port
+server.port=8080
+```
+
+---
+
+## 🤖 AI Service Features
+
+- **Intelligent Question Generation**: Uses Google Gemini 2.5 Flash model
+- **Question Customization**: Easy, medium, hard difficulty levels
+- **Rate Limiting**: 6 requests per 60 seconds
+- **Exponential Backoff**: Automatic retry on rate limit or errors
+- **JSON Recovery**: Handles truncated API responses
+- **Dynamic Timeout**: 2 seconds per question (scales to 200s for 100 questions)
+- **Stateless Architecture**: Independent deployment and scaling
+
+### Generation Flow
+1. Frontend/Backend requests question generation
+2. AI service validates and applies rate limiter
+3. Calls Google Gemini API with structured prompt
+4. Implements exponential backoff on failures
+5. Recovers JSON from truncated responses
+6. Returns validated MCQ questions
+7. Backend stores questions in database
+
+---
+
+## 🔒 Security Features
+
+- ✅ JWT-based authentication with expiration
+- ✅ BCrypt password encryption with salt
+- ✅ Role-based API authorization
+- ✅ Stateless session management for scalability
+- ✅ CORS configured for frontend access
+- ✅ Input validation on all endpoints
+- ✅ SQL injection protection via JPA parameterized queries
+- ✅ Token signature validation on each request
+- ✅ Rate limiting on AI service (6 req/60s)
+
+---
+
+## 📈 Project Status
+
+| Component | Status |
+|-----------|--------|
+| Frontend (React SPA) | ✅ Production Ready |
+| Backend (75+ APIs) | ✅ Production Ready |
+| Database (MySQL) | ✅ Operational |
+| JWT Authentication | ✅ Fully Working |
+| Role-Based Authorization | ✅ Enforced |
+| AI Service | ✅ Production Ready |
+| Rate Limiting | ✅ Active |
+| Error Handling | ✅ Comprehensive |
+| Analytics | ✅ Integrated |
+| Assignments | ✅ Implemented |
+
+---
+
+## 🧪 Testing
+
+### Run Backend Tests
+```bash
+cd SkillForge/SkillForgeBackend
+mvn test
+```
+
+### Run Frontend Tests
+```bash
+cd SkillForge/Frontend/react-frontend
+npm test
+```
+
+---
+
+## 📝 Documentation
+
+See individual README files for detailed information:
+- [Backend Documentation](./SkillForge/SkillForgeBackend/README.md)
+- [AI Service Documentation](./ai-service/README.md)
+
+---
+
+## 🎯 Conclusion
+
+SkillForge is a **complete, production-ready full-stack application** demonstrating:
 
 <p>
 SkillForge is a <strong>full-stack, role-based learning and examination platform</strong> built using
