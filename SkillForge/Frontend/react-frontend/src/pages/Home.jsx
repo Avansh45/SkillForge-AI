@@ -8,7 +8,6 @@ import ContactSection from '../components/ContactSection';
 import { useCourses } from '../hooks';
 import { enrollInCourse } from '../api/studentService';
 import { getUserSession } from '../utils/auth';
-import * as adminService from '../api/adminService';
 
 const Home = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -17,8 +16,6 @@ const Home = () => {
   const [formError, setFormError] = useState('');
   const [enrolling, setEnrolling] = useState(null);
   const [user, setUser] = useState(null);
-  const [platformStats, setPlatformStats] = useState(null);
-  const [statsLoading, setStatsLoading] = useState(true);
   const navigate = useNavigate();
   
   // Use custom hook for courses
@@ -28,22 +25,6 @@ const Home = () => {
   useEffect(() => {
     const currentUser = getUserSession();
     setUser(currentUser);
-  }, []);
-
-  // Fetch platform statistics
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        setStatsLoading(true);
-        const statsData = await adminService.getPlatformStatistics().catch(() => null);
-        setPlatformStats(statsData?.data || {});
-      } catch (err) {
-        console.error('Error fetching platform statistics:', err);
-      } finally {
-        setStatsLoading(false);
-      }
-    };
-    fetchStats();
   }, []);
 
   const handleCourseClick = (course) => {
@@ -199,44 +180,6 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Platform Stats Section */}
-      <section style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', padding: '3rem 0', color: 'white' }}>
-        <div className="container">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem', textAlign: 'center' }}>
-            <div>
-              <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
-                {statsLoading ? '⏳' : (platformStats?.totalUsers || 0).toLocaleString()}+
-              </div>
-              <div style={{ fontSize: '0.95rem', opacity: 0.9 }}>Active Users</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
-                {courses.length || 0}
-              </div>
-              <div style={{ fontSize: '0.95rem', opacity: 0.9 }}>Courses Available</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
-                {statsLoading ? '⏳' : (platformStats?.totalExams || 0).toLocaleString()}
-              </div>
-              <div style={{ fontSize: '0.95rem', opacity: 0.9 }}>Exams Conducted</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
-                {statsLoading ? 'N/A' : `${(platformStats?.averageScore || 0).toFixed(1)}%`}
-              </div>
-              <div style={{ fontSize: '0.95rem', opacity: 0.9 }}>Avg Platform Score</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>
-                {statsLoading ? '⏳' : (platformStats?.completionRate || 0).toFixed(0)}%
-              </div>
-              <div style={{ fontSize: '0.95rem', opacity: 0.9 }}>Completion Rate</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* About Section */}
       <section id="about">
         <div className="container">
@@ -270,100 +213,6 @@ const Home = () => {
                   Designed to support college training, test prep, and internal assessments.
                 </li>
               </ul>
-            </div>
-
-            <div className="about-card">
-              <h3>Live Platform Metrics</h3>
-              <p>
-                {platformStats?.totalUsers || 0}+ active users across the platform with {courses.length} courses and {platformStats?.totalExams || 0} exams conducted. Our platform maintains a {(platformStats?.completionRate || 0).toFixed(0)}% completion rate with an average score of {(platformStats?.averageScore || 0).toFixed(1)}%.
-              </p>
-              <div className="about-metric">
-                <div>
-                  <strong>{platformStats?.totalUsers || 0}+</strong>
-                  <span>Active users</span>
-                </div>
-                <div>
-                  <strong>{courses.length}</strong>
-                  <span>Courses available</span>
-                </div>
-                <div>
-                  <strong>{platformStats?.totalExams || 0}</strong>
-                  <span>Exams conducted</span>
-                </div>
-                <div>
-                  <strong>{(platformStats?.averageScore || 0).toFixed(1)}%</strong>
-                  <span>Avg platform score</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Platform Insights Section */}
-      <section style={{ padding: '4rem 0', background: '#f8f9fa' }}>
-        <div className="container">
-          <div className="section-heading">
-            <h2>Live Platform Insights</h2>
-            <p>Real-time metrics showing platform activity and engagement.</p>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem', marginTop: '2rem' }}>
-            {/* User Breakdown */}
-            <div style={{ background: 'white', padding: '2rem', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-              <h4 style={{ marginTop: 0, color: '#333', fontSize: '1.1rem', fontWeight: '600' }}>👥 User Distribution</h4>
-              <div style={{ marginTop: '1rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                  <span>Students</span>
-                  <strong style={{ color: '#667eea' }}>{platformStats?.studentCount || 0}</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                  <span>Instructors</span>
-                  <strong style={{ color: '#764ba2' }}>{platformStats?.instructorCount || 0}</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>Admins</span>
-                  <strong style={{ color: '#11998e' }}>{platformStats?.adminCount || 0}</strong>
-                </div>
-              </div>
-            </div>
-
-            {/* Activity Metrics */}
-            <div style={{ background: 'white', padding: '2rem', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-              <h4 style={{ marginTop: 0, color: '#333', fontSize: '1.1rem', fontWeight: '600' }}>📊 Activity Today</h4>
-              <div style={{ marginTop: '1rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                  <span>Active users</span>
-                  <strong style={{ color: '#11998e' }}>{platformStats?.activeUsersToday || 0}</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                  <span>Exams completed</span>
-                  <strong style={{ color: '#ee7752' }}>{platformStats?.examsCompletedToday || 0}</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>Avg score</span>
-                  <strong style={{ color: '#ffa502' }}>{(platformStats?.todayAverageScore || 0).toFixed(1)}%</strong>
-                </div>
-              </div>
-            </div>
-
-            {/* Platform Health */}
-            <div style={{ background: 'white', padding: '2rem', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-              <h4 style={{ marginTop: 0, color: '#333', fontSize: '1.1rem', fontWeight: '600' }}>💚 Platform Health</h4>
-              <div style={{ marginTop: '1rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                  <span>Completion rate</span>
-                  <strong style={{ color: '#38ef7d' }}>{(platformStats?.completionRate || 0).toFixed(0)}%</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                  <span>Total questions</span>
-                  <strong style={{ color: '#667eea' }}>{(platformStats?.totalQuestions || 0).toLocaleString()}</strong>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>Avg session duration</span>
-                  <strong style={{ color: '#764ba2' }}>{platformStats?.avgSessionDuration || 0} min</strong>
-                </div>
-              </div>
             </div>
           </div>
         </div>

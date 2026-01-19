@@ -240,8 +240,9 @@ const InstructorDashboard = () => {
       navigate('/settings');
       return;
     }
-    setActiveSection(targetKey);
-    const block = document.querySelector(`[data-section="${targetKey}"]`);
+    const sectionKey = targetKey === 'aiexamgenerator' ? 'exams' : targetKey;
+    setActiveSection(sectionKey);
+    const block = document.querySelector(`[data-section="${sectionKey}"]`);
     if (block && headerRef.current) {
       const headerHeight = headerRef.current.offsetHeight;
       const rect = block.getBoundingClientRect();
@@ -254,6 +255,7 @@ const InstructorDashboard = () => {
     { key: 'overview', label: 'Overview' },
     { key: 'courses', label: 'Courses / Batches' },
     { key: 'exams', label: 'Exams' },
+    { key: 'aiexamgenerator', label: 'AI Exam Generator' },
     { key: 'analytics', label: 'Analytics' },
     { key: 'settings', label: 'Settings' },
   ];
